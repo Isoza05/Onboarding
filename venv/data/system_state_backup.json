@@ -1,0 +1,1551 @@
+{
+  "active_sessions": {
+    "864468c8-a16e-4761-b907-0c4600d7e800": {
+      "employee_id": "EMP001",
+      "session_id": "864468c8-a16e-4761-b907-0c4600d7e800",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP001",
+        "name": "Juan P\u00e9rez",
+        "email": "juan@test.com"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "test_agent": {
+          "agent_id": "test_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-24T21:30:37.376599",
+          "data": {
+            "current_task": "processing_email"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-10-24T21:30:37.351239",
+      "updated_at": "2025-10-24T21:30:37.376599",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "1b791fed-5315-4e04-a93f-d8b6d2b7790b": {
+      "employee_id": "EMP_ORCH_001",
+      "session_id": "1b791fed-5315-4e04-a93f-d8b6d2b7790b",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_ORCH_001",
+        "employee_data": {
+          "employee_id": "EMP_ORCH_001",
+          "first_name": "Carlos",
+          "middle_name": "Alberto",
+          "last_name": "Gonz\u00e1lez P\u00e9rez",
+          "preferred_name": "Carlos",
+          "email": "carlos.gonzalez@empresa.com",
+          "phone": "+506-8888-9999",
+          "id_card": "1-1234-5678",
+          "passport": "CR123456789",
+          "employment_type": "full_time",
+          "position_level": "senior",
+          "department": "Engineering",
+          "hire_date": "2025-11-11T16:28:22.060997",
+          "manager_email": "manager@empresa.com"
+        },
+        "contract_data": {
+          "salary": 85000.0,
+          "currency": "USD",
+          "employment_type": "Full-time",
+          "work_modality": "Hybrid",
+          "start_date": "2025-11-11",
+          "probation_period": 90,
+          "benefits": [
+            "Seguro m\u00e9dico",
+            "Vacaciones",
+            "Aguinaldo",
+            "Bono por desempe\u00f1o"
+          ],
+          "position_title": "Senior Software Engineer",
+          "reporting_manager": "Mar\u00eda L\u00f3pez",
+          "job_level": "Senior",
+          "location": "San Jos\u00e9, Costa Rica"
+        },
+        "orchestration_id": "orch_20251028_222822"
+      },
+      "processed_data": {
+        "orchestration_completed": true,
+        "final_result": {
+          "orchestration_id": "orch_20251028_222822",
+          "session_id": "1b791fed-5315-4e04-a93f-d8b6d2b7790b",
+          "employee_id": "EMP_ORCH_001",
+          "success": true,
+          "completion_status": "completed",
+          "final_phase": "finalization",
+          "agent_results": {
+            "initial_data_collection_agent": {
+              "success": true,
+              "agent_id": "initial_data_collection_agent",
+              "processing_time": 2.5,
+              "structured_data": {
+                "employee_id": "EMP_ORCH_001",
+                "first_name": "Carlos",
+                "middle_name": "Alberto",
+                "last_name": "Gonz\u00e1lez P\u00e9rez",
+                "preferred_name": "Carlos",
+                "email": "carlos.gonzalez@empresa.com",
+                "phone": "+506-8888-9999",
+                "id_card": "1-1234-5678",
+                "passport": "CR123456789",
+                "employment_type": "full_time",
+                "position_level": "senior",
+                "department": "Engineering",
+                "hire_date": "2025-11-11T16:28:22.060997",
+                "manager_email": "manager@empresa.com"
+              },
+              "validation_score": 85.0,
+              "completed_at": "2025-10-28T22:28:22.152773"
+            },
+            "confirmation_data_agent": {
+              "success": true,
+              "agent_id": "confirmation_data_agent",
+              "processing_time": 3.2,
+              "validation_score": 78.5,
+              "contract_validated": true,
+              "offer_generated": true,
+              "completed_at": "2025-10-28T22:28:22.152773"
+            },
+            "documentation_agent": {
+              "success": true,
+              "agent_id": "documentation_agent",
+              "processing_time": 4.1,
+              "compliance_score": 72.3,
+              "documents_validated": 4,
+              "validation_status": "requires_review",
+              "completed_at": "2025-10-28T22:28:22.152773"
+            }
+          },
+          "consolidated_data": {
+            "employee_data": {
+              "employee_id": "EMP_ORCH_001",
+              "first_name": "Carlos",
+              "middle_name": "Alberto",
+              "last_name": "Gonz\u00e1lez P\u00e9rez",
+              "preferred_name": "Carlos",
+              "email": "carlos.gonzalez@empresa.com",
+              "phone": "+506-8888-9999",
+              "id_card": "1-1234-5678",
+              "passport": "CR123456789",
+              "employment_type": "full_time",
+              "position_level": "senior",
+              "department": "Engineering",
+              "hire_date": "2025-11-11T16:28:22.060997",
+              "manager_email": "manager@empresa.com"
+            },
+            "validation_results": {
+              "data_collection": {
+                "score": 85.0,
+                "status": "completed"
+              },
+              "contract_validation": {
+                "score": 78.5,
+                "contract_validated": true,
+                "offer_generated": true
+              },
+              "documentation": {
+                "compliance_score": 72.3,
+                "documents_validated": 4,
+                "validation_status": "requires_review"
+              }
+            },
+            "processing_summary": {
+              "agents_executed": 3,
+              "successful_agents": 3,
+              "total_processing_time": 9.8,
+              "overall_success": true,
+              "overall_quality_score": 78.60000000000001
+            }
+          },
+          "processing_summary": {
+            "agents_executed": 3,
+            "successful_agents": 3,
+            "total_processing_time": 9.8,
+            "overall_success": true,
+            "overall_quality_score": 78.60000000000001
+          },
+          "workflow_steps": [
+            {
+              "step_id": "pattern_selection",
+              "step_name": "Pattern Selection",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "selected_pattern": "concurrent_data_collection",
+                "required_agents": [
+                  "initial_data_collection_agent",
+                  "confirmation_data_agent",
+                  "documentation_agent"
+                ],
+                "orchestration_config": {
+                  "max_concurrent_agents": 5,
+                  "timeout_per_agent": 180,
+                  "retry_policy": {
+                    "max_retries": 2,
+                    "backoff_factor": 1.5
+                  },
+                  "specialized_validations": [
+                    "technical_skills",
+                    "security_clearance"
+                  ],
+                  "escalation_threshold": "low",
+                  "quality_gates": [
+                    "manager_approval",
+                    "hr_director_approval"
+                  ],
+                  "estimated_duration": 900,
+                  "sla_deadline": "2025-10-28T22:43:22.144253"
+                },
+                "selection_rationale": {
+                  "employee_type": "full_time",
+                  "position_level": "senior",
+                  "department": "Engineering",
+                  "priority": "high",
+                  "special_considerations": [
+                    "Senior engineer validation",
+                    "Security clearance required",
+                    "Fast track processing"
+                  ]
+                },
+                "estimated_completion": "2025-10-28T22:43:22.144253",
+                "quality_gates": [
+                  "manager_approval",
+                  "hr_director_approval"
+                ],
+                "processing_timestamp": "2025-10-28T22:28:22.144253"
+              },
+              "completed_at": "2025-10-28T22:28:22.146249"
+            },
+            {
+              "step_id": "task_distribution",
+              "step_name": "Task Distribution",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "distribution_plan": {
+                  "pattern": "concurrent_data_collection",
+                  "strategy": {
+                    "strategy_type": "concurrent",
+                    "max_concurrent_agents": 5,
+                    "task_timeout": 300,
+                    "retry_policy": {
+                      "max_retries": 2,
+                      "backoff_factor": 1.5
+                    },
+                    "pattern": "concurrent_data_collection",
+                    "priority": "high",
+                    "special_requirements": [
+                      "Senior engineer validation",
+                      "Security clearance required",
+                      "Fast track processing"
+                    ],
+                    "agent_config": {
+                      "timeout_per_agent": 300,
+                      "quality_threshold": 75.0,
+                      "parallel_execution": true
+                    },
+                    "deadline": "2025-10-28T18:28:22.060997",
+                    "timeout_minutes": 30,
+                    "timeout_per_agent": 180,
+                    "specialized_validations": [
+                      "technical_skills",
+                      "security_clearance"
+                    ],
+                    "escalation_threshold": "low",
+                    "quality_gates": [
+                      "manager_approval",
+                      "hr_director_approval"
+                    ],
+                    "estimated_duration": 900,
+                    "sla_deadline": "2025-10-28T22:43:22.144253"
+                  },
+                  "task_assignments": [
+                    {
+                      "task_id": "task_d493d0df",
+                      "agent_type": "initial_data_collection_agent",
+                      "agent_id": "initial_data_collection_agent",
+                      "task_description": "Procesar datos iniciales del empleado",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:28:22.060997",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "raw_email_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:28:22.060997",
+                          "manager_email": "manager@empresa.com"
+                        }
+                      },
+                      "priority": "high",
+                      "dependencies": [],
+                      "estimated_duration": 180,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    },
+                    {
+                      "task_id": "task_86655560",
+                      "agent_type": "confirmation_data_agent",
+                      "agent_id": "confirmation_data_agent",
+                      "task_description": "Validar t\u00e9rminos contractuales",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:28:22.060997",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "contract_data": {
+                          "salary": 85000.0,
+                          "currency": "USD",
+                          "employment_type": "Full-time",
+                          "work_modality": "Hybrid",
+                          "start_date": "2025-11-11",
+                          "probation_period": 90,
+                          "benefits": [
+                            "Seguro m\u00e9dico",
+                            "Vacaciones",
+                            "Aguinaldo",
+                            "Bono por desempe\u00f1o"
+                          ],
+                          "position_title": "Senior Software Engineer",
+                          "reporting_manager": "Mar\u00eda L\u00f3pez",
+                          "job_level": "Senior",
+                          "location": "San Jos\u00e9, Costa Rica"
+                        }
+                      },
+                      "priority": "high",
+                      "dependencies": [],
+                      "estimated_duration": 200,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    },
+                    {
+                      "task_id": "task_96b70559",
+                      "agent_type": "documentation_agent",
+                      "agent_id": "documentation_agent",
+                      "task_description": "Validar documentaci\u00f3n del empleado",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:28:22.060997",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "documents": [
+                          {
+                            "document_id": "doc_orch_001",
+                            "document_type": "vaccination_card",
+                            "file_name": "carnet_vacunacion_carlos.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 256,
+                            "content_hash": "orch_abc123"
+                          },
+                          {
+                            "document_id": "doc_orch_002",
+                            "document_type": "id_document",
+                            "file_name": "cedula_carlos.jpg",
+                            "file_format": "jpg",
+                            "file_size_kb": 145,
+                            "content_hash": "orch_def456"
+                          },
+                          {
+                            "document_id": "doc_orch_003",
+                            "document_type": "cv_resume",
+                            "file_name": "CV_Carlos_Gonzalez_2024.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 678,
+                            "content_hash": "orch_ghi789"
+                          },
+                          {
+                            "document_id": "doc_orch_004",
+                            "document_type": "academic_titles",
+                            "file_name": "titulo_ingenieria_sistemas.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 423,
+                            "content_hash": "orch_jkl012"
+                          }
+                        ]
+                      },
+                      "priority": "medium",
+                      "dependencies": [],
+                      "estimated_duration": 240,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    }
+                  ],
+                  "execution_order": [
+                    {
+                      "group": "concurrent_data_collection",
+                      "tasks": [
+                        "task_d493d0df",
+                        "task_86655560",
+                        "task_96b70559"
+                      ],
+                      "execution_type": "parallel",
+                      "wait_for_all": true
+                    }
+                  ],
+                  "dependencies": {},
+                  "timing_estimates": {
+                    "total_estimated_seconds": 300,
+                    "estimated_completion": "2025-10-28T22:33:22.149773",
+                    "sla_buffer_seconds": 300,
+                    "critical_path": [
+                      "task_d493d0df"
+                    ]
+                  },
+                  "monitoring_checkpoints": [
+                    {
+                      "checkpoint_id": "checkpoint_0",
+                      "check_time_seconds": 75,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_1",
+                      "check_time_seconds": 150,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_2",
+                      "check_time_seconds": 225,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_3",
+                      "check_time_seconds": 300,
+                      "criteria": "agent_progress_check"
+                    }
+                  ]
+                },
+                "tasks_created": 3,
+                "execution_strategy": "concurrent",
+                "estimated_completion": "2025-10-28T22:33:22.149773",
+                "processing_timestamp": "2025-10-28T22:28:22.149773"
+              },
+              "completed_at": "2025-10-28T22:28:22.150772"
+            },
+            {
+              "step_id": "concurrent_execution",
+              "step_name": "Concurrent Data Collection",
+              "status": "completed",
+              "agents_executed": 3,
+              "completed_at": "2025-10-28T22:28:22.249934"
+            },
+            {
+              "step_id": "state_coordination",
+              "step_name": "Agent State Coordination",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "coordination_result": {
+                  "session_id": "1b791fed-5315-4e04-a93f-d8b6d2b7790b",
+                  "action": "sync",
+                  "agents_coordinated": [
+                    "initial_data_collection_agent",
+                    "confirmation_data_agent",
+                    "documentation_agent"
+                  ],
+                  "state_updates": {
+                    "initial_data_collection_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    },
+                    "confirmation_data_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    },
+                    "documentation_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    }
+                  },
+                  "synchronization_status": "success",
+                  "conflicts_resolved": 0
+                },
+                "processing_timestamp": "2025-10-28T22:28:22.254451"
+              },
+              "completed_at": "2025-10-28T22:28:22.255470"
+            },
+            {
+              "step_id": "progress_monitoring",
+              "step_name": "Progress Monitoring",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "progress_metrics": {
+                  "session_id": "1b791fed-5315-4e04-a93f-d8b6d2b7790b",
+                  "current_phase": "data_collection_concurrent",
+                  "monitoring_timestamp": "2025-10-28T22:28:22.262811",
+                  "steps_total": 4,
+                  "steps_completed": 4,
+                  "progress_percentage": 100.0,
+                  "elapsed_time_seconds": 0.16,
+                  "elapsed_time_minutes": 0.0,
+                  "overall_quality_score": 78.6
+                },
+                "agent_analysis": {
+                  "initial_data_collection_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 2.5,
+                    "quality_score": 85.0
+                  },
+                  "confirmation_data_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 3.2,
+                    "quality_score": 78.5
+                  },
+                  "documentation_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 4.1,
+                    "quality_score": 72.3
+                  }
+                },
+                "sla_analysis": {
+                  "status": "compliant",
+                  "violations": [],
+                  "warnings": [],
+                  "time_remaining_minutes": 30.0
+                },
+                "next_actions": [
+                  "Continuar monitoreo normal"
+                ],
+                "escalation_needed": false,
+                "quality_gates": {
+                  "passed": 3,
+                  "total": 3,
+                  "overall_score": 78.60000000000001
+                },
+                "processing_timestamp": "2025-10-28T22:28:22.262811"
+              },
+              "completed_at": "2025-10-28T22:28:22.264388"
+            },
+            {
+              "step_id": "data_aggregation",
+              "step_name": "Data Aggregation",
+              "status": "completed",
+              "result": {
+                "employee_data": {
+                  "employee_id": "EMP_ORCH_001",
+                  "first_name": "Carlos",
+                  "middle_name": "Alberto",
+                  "last_name": "Gonz\u00e1lez P\u00e9rez",
+                  "preferred_name": "Carlos",
+                  "email": "carlos.gonzalez@empresa.com",
+                  "phone": "+506-8888-9999",
+                  "id_card": "1-1234-5678",
+                  "passport": "CR123456789",
+                  "employment_type": "full_time",
+                  "position_level": "senior",
+                  "department": "Engineering",
+                  "hire_date": "2025-11-11T16:28:22.060997",
+                  "manager_email": "manager@empresa.com"
+                },
+                "validation_results": {
+                  "data_collection": {
+                    "score": 85.0,
+                    "status": "completed"
+                  },
+                  "contract_validation": {
+                    "score": 78.5,
+                    "contract_validated": true,
+                    "offer_generated": true
+                  },
+                  "documentation": {
+                    "compliance_score": 72.3,
+                    "documents_validated": 4,
+                    "validation_status": "requires_review"
+                  }
+                },
+                "processing_summary": {
+                  "agents_executed": 3,
+                  "successful_agents": 3,
+                  "total_processing_time": 9.8,
+                  "overall_success": true,
+                  "overall_quality_score": 78.60000000000001
+                }
+              },
+              "completed_at": "2025-10-28T22:28:22.270390"
+            }
+          ],
+          "errors": [],
+          "started_at": "2025-10-28T22:28:22.107081",
+          "completed_at": "2025-10-28T22:28:22.272907"
+        },
+        "data_collection_phase": "completed"
+      },
+      "validation_results": {},
+      "agent_states": {
+        "initial_data_collection_agent": {
+          "agent_id": "initial_data_collection_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:28:22.153284",
+          "data": {
+            "success": true,
+            "agent_id": "initial_data_collection_agent",
+            "processing_time": 2.5,
+            "structured_data": {
+              "employee_id": "EMP_ORCH_001",
+              "first_name": "Carlos",
+              "middle_name": "Alberto",
+              "last_name": "Gonz\u00e1lez P\u00e9rez",
+              "preferred_name": "Carlos",
+              "email": "carlos.gonzalez@empresa.com",
+              "phone": "+506-8888-9999",
+              "id_card": "1-1234-5678",
+              "passport": "CR123456789",
+              "employment_type": "full_time",
+              "position_level": "senior",
+              "department": "Engineering",
+              "hire_date": "2025-11-11T16:28:22.060997",
+              "manager_email": "manager@empresa.com"
+            },
+            "validation_score": 85.0,
+            "completed_at": "2025-10-28T22:28:22.152773"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "confirmation_data_agent": {
+          "agent_id": "confirmation_data_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:28:22.183946",
+          "data": {
+            "success": true,
+            "agent_id": "confirmation_data_agent",
+            "processing_time": 3.2,
+            "validation_score": 78.5,
+            "contract_validated": true,
+            "offer_generated": true,
+            "completed_at": "2025-10-28T22:28:22.152773"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:28:22.215001",
+          "data": {
+            "success": true,
+            "agent_id": "documentation_agent",
+            "processing_time": 4.1,
+            "compliance_score": 72.3,
+            "documents_validated": 4,
+            "validation_status": "requires_review",
+            "completed_at": "2025-10-28T22:28:22.152773"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-10-28T22:28:22.107081",
+      "updated_at": "2025-10-28T22:28:22.272907",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "2e71ea6f-953a-4b32-8dca-92becd9ff3eb": {
+      "employee_id": "EMP_ORCH_001",
+      "session_id": "2e71ea6f-953a-4b32-8dca-92becd9ff3eb",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_ORCH_001",
+        "employee_data": {
+          "employee_id": "EMP_ORCH_001",
+          "first_name": "Carlos",
+          "middle_name": "Alberto",
+          "last_name": "Gonz\u00e1lez P\u00e9rez",
+          "preferred_name": "Carlos",
+          "email": "carlos.gonzalez@empresa.com",
+          "phone": "+506-8888-9999",
+          "id_card": "1-1234-5678",
+          "passport": "CR123456789",
+          "employment_type": "full_time",
+          "position_level": "senior",
+          "department": "Engineering",
+          "hire_date": "2025-11-11T16:50:18.786963",
+          "manager_email": "manager@empresa.com"
+        },
+        "contract_data": {
+          "salary": 85000.0,
+          "currency": "USD",
+          "employment_type": "Full-time",
+          "work_modality": "Hybrid",
+          "start_date": "2025-11-11",
+          "probation_period": 90,
+          "benefits": [
+            "Seguro m\u00e9dico",
+            "Vacaciones",
+            "Aguinaldo",
+            "Bono por desempe\u00f1o"
+          ],
+          "position_title": "Senior Software Engineer",
+          "reporting_manager": "Mar\u00eda L\u00f3pez",
+          "job_level": "Senior",
+          "location": "San Jos\u00e9, Costa Rica"
+        },
+        "orchestration_id": "orch_20251028_225018_EMP_ORCH_001"
+      },
+      "processed_data": {
+        "orchestration_completed": true,
+        "final_result": {
+          "orchestration_id": "orch_20251028_225018_EMP_ORCH_001",
+          "session_id": "2e71ea6f-953a-4b32-8dca-92becd9ff3eb",
+          "employee_id": "EMP_ORCH_001",
+          "success": true,
+          "completion_status": "completed",
+          "final_phase": "finalization",
+          "agent_results": {
+            "initial_data_collection_agent": {
+              "success": true,
+              "agent_id": "initial_data_collection_agent",
+              "processing_time": 2.5,
+              "structured_data": {
+                "employee_id": "EMP_ORCH_001",
+                "first_name": "Carlos",
+                "middle_name": "Alberto",
+                "last_name": "Gonz\u00e1lez P\u00e9rez",
+                "preferred_name": "Carlos",
+                "email": "carlos.gonzalez@empresa.com",
+                "phone": "+506-8888-9999",
+                "id_card": "1-1234-5678",
+                "passport": "CR123456789",
+                "employment_type": "full_time",
+                "position_level": "senior",
+                "department": "Engineering",
+                "hire_date": "2025-11-11T16:50:18.786963",
+                "manager_email": "manager@empresa.com"
+              },
+              "validation_score": 85.0,
+              "completed_at": "2025-10-28T22:50:18.946063"
+            },
+            "confirmation_data_agent": {
+              "success": true,
+              "agent_id": "confirmation_data_agent",
+              "processing_time": 3.2,
+              "validation_score": 78.5,
+              "contract_validated": true,
+              "offer_generated": true,
+              "completed_at": "2025-10-28T22:50:18.946063"
+            },
+            "documentation_agent": {
+              "success": true,
+              "agent_id": "documentation_agent",
+              "processing_time": 4.1,
+              "compliance_score": 72.3,
+              "documents_validated": 4,
+              "validation_status": "requires_review",
+              "completed_at": "2025-10-28T22:50:18.947062"
+            }
+          },
+          "consolidated_data": {
+            "employee_data": {
+              "employee_id": "EMP_ORCH_001",
+              "first_name": "Carlos",
+              "middle_name": "Alberto",
+              "last_name": "Gonz\u00e1lez P\u00e9rez",
+              "preferred_name": "Carlos",
+              "email": "carlos.gonzalez@empresa.com",
+              "phone": "+506-8888-9999",
+              "id_card": "1-1234-5678",
+              "passport": "CR123456789",
+              "employment_type": "full_time",
+              "position_level": "senior",
+              "department": "Engineering",
+              "hire_date": "2025-11-11T16:50:18.786963",
+              "manager_email": "manager@empresa.com"
+            },
+            "validation_results": {
+              "data_collection": {
+                "score": 85.0,
+                "status": "completed"
+              },
+              "contract_validation": {
+                "score": 78.5,
+                "contract_validated": true,
+                "offer_generated": true
+              },
+              "documentation": {
+                "compliance_score": 72.3,
+                "documents_validated": 4,
+                "validation_status": "requires_review"
+              }
+            },
+            "processing_summary": {
+              "agents_executed": 3,
+              "successful_agents": 3,
+              "total_processing_time": 9.8,
+              "overall_success": true,
+              "overall_quality_score": 78.60000000000001
+            }
+          },
+          "processing_summary": {
+            "agents_executed": 3,
+            "successful_agents": 3,
+            "total_processing_time": 9.8,
+            "overall_success": true,
+            "overall_quality_score": 78.60000000000001
+          },
+          "workflow_steps": [
+            {
+              "step_id": "pattern_selection",
+              "step_name": "Pattern Selection",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "selected_pattern": "concurrent_data_collection",
+                "required_agents": [
+                  "initial_data_collection_agent",
+                  "confirmation_data_agent",
+                  "documentation_agent"
+                ],
+                "orchestration_config": {
+                  "max_concurrent_agents": 5,
+                  "timeout_per_agent": 180,
+                  "retry_policy": {
+                    "max_retries": 2,
+                    "backoff_factor": 1.5
+                  },
+                  "specialized_validations": [
+                    "technical_skills",
+                    "security_clearance"
+                  ],
+                  "escalation_threshold": "low",
+                  "quality_gates": [
+                    "manager_approval",
+                    "hr_director_approval"
+                  ],
+                  "estimated_duration": 900,
+                  "sla_deadline": "2025-10-28T23:05:18.921788"
+                },
+                "selection_rationale": {
+                  "employee_type": "full_time",
+                  "position_level": "senior",
+                  "department": "Engineering",
+                  "priority": "high",
+                  "special_considerations": [
+                    "Senior engineer validation",
+                    "Security clearance required",
+                    "Fast track processing"
+                  ]
+                },
+                "estimated_completion": "2025-10-28T23:05:18.921788",
+                "quality_gates": [
+                  "manager_approval",
+                  "hr_director_approval"
+                ],
+                "processing_timestamp": "2025-10-28T22:50:18.921788"
+              },
+              "completed_at": "2025-10-28T22:50:18.922787"
+            },
+            {
+              "step_id": "task_distribution",
+              "step_name": "Task Distribution",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "distribution_plan": {
+                  "pattern": "concurrent_data_collection",
+                  "strategy": {
+                    "strategy_type": "concurrent",
+                    "max_concurrent_agents": 5,
+                    "task_timeout": 300,
+                    "retry_policy": {
+                      "max_retries": 2,
+                      "backoff_factor": 1.5
+                    },
+                    "pattern": "concurrent_data_collection",
+                    "priority": "high",
+                    "special_requirements": [
+                      "Senior engineer validation",
+                      "Security clearance required",
+                      "Fast track processing"
+                    ],
+                    "agent_config": {
+                      "timeout_per_agent": 300,
+                      "quality_threshold": 75.0,
+                      "parallel_execution": true
+                    },
+                    "deadline": "2025-10-28T18:50:18.786963",
+                    "timeout_minutes": 30,
+                    "timeout_per_agent": 180,
+                    "specialized_validations": [
+                      "technical_skills",
+                      "security_clearance"
+                    ],
+                    "escalation_threshold": "low",
+                    "quality_gates": [
+                      "manager_approval",
+                      "hr_director_approval"
+                    ],
+                    "estimated_duration": 900,
+                    "sla_deadline": "2025-10-28T23:05:18.921788"
+                  },
+                  "task_assignments": [
+                    {
+                      "task_id": "task_ce4000e6",
+                      "agent_type": "initial_data_collection_agent",
+                      "agent_id": "initial_data_collection_agent",
+                      "task_description": "Procesar datos iniciales del empleado",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:50:18.786963",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "raw_email_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:50:18.786963",
+                          "manager_email": "manager@empresa.com"
+                        }
+                      },
+                      "priority": "high",
+                      "dependencies": [],
+                      "estimated_duration": 180,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    },
+                    {
+                      "task_id": "task_f2b2ec36",
+                      "agent_type": "confirmation_data_agent",
+                      "agent_id": "confirmation_data_agent",
+                      "task_description": "Validar t\u00e9rminos contractuales",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:50:18.786963",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "contract_data": {
+                          "salary": 85000.0,
+                          "currency": "USD",
+                          "employment_type": "Full-time",
+                          "work_modality": "Hybrid",
+                          "start_date": "2025-11-11",
+                          "probation_period": 90,
+                          "benefits": [
+                            "Seguro m\u00e9dico",
+                            "Vacaciones",
+                            "Aguinaldo",
+                            "Bono por desempe\u00f1o"
+                          ],
+                          "position_title": "Senior Software Engineer",
+                          "reporting_manager": "Mar\u00eda L\u00f3pez",
+                          "job_level": "Senior",
+                          "location": "San Jos\u00e9, Costa Rica"
+                        }
+                      },
+                      "priority": "high",
+                      "dependencies": [],
+                      "estimated_duration": 200,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    },
+                    {
+                      "task_id": "task_2eed16b9",
+                      "agent_type": "documentation_agent",
+                      "agent_id": "documentation_agent",
+                      "task_description": "Validar documentaci\u00f3n del empleado",
+                      "input_data": {
+                        "employee_data": {
+                          "employee_id": "EMP_ORCH_001",
+                          "first_name": "Carlos",
+                          "middle_name": "Alberto",
+                          "last_name": "Gonz\u00e1lez P\u00e9rez",
+                          "preferred_name": "Carlos",
+                          "email": "carlos.gonzalez@empresa.com",
+                          "phone": "+506-8888-9999",
+                          "id_card": "1-1234-5678",
+                          "passport": "CR123456789",
+                          "employment_type": "full_time",
+                          "position_level": "senior",
+                          "department": "Engineering",
+                          "hire_date": "2025-11-11T16:50:18.786963",
+                          "manager_email": "manager@empresa.com"
+                        },
+                        "documents": [
+                          {
+                            "document_id": "doc_orch_001",
+                            "document_type": "vaccination_card",
+                            "file_name": "carnet_vacunacion_carlos.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 256,
+                            "content_hash": "orch_abc123"
+                          },
+                          {
+                            "document_id": "doc_orch_002",
+                            "document_type": "id_document",
+                            "file_name": "cedula_carlos.jpg",
+                            "file_format": "jpg",
+                            "file_size_kb": 145,
+                            "content_hash": "orch_def456"
+                          },
+                          {
+                            "document_id": "doc_orch_003",
+                            "document_type": "cv_resume",
+                            "file_name": "CV_Carlos_Gonzalez_2024.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 678,
+                            "content_hash": "orch_ghi789"
+                          },
+                          {
+                            "document_id": "doc_orch_004",
+                            "document_type": "academic_titles",
+                            "file_name": "titulo_ingenieria_sistemas.pdf",
+                            "file_format": "pdf",
+                            "file_size_kb": 423,
+                            "content_hash": "orch_jkl012"
+                          }
+                        ]
+                      },
+                      "priority": "medium",
+                      "dependencies": [],
+                      "estimated_duration": 240,
+                      "timeout": 300,
+                      "retry_config": {
+                        "max_retries": 2,
+                        "backoff_factor": 1.5
+                      },
+                      "execution_group": "concurrent_data_collection"
+                    }
+                  ],
+                  "execution_order": [
+                    {
+                      "group": "concurrent_data_collection",
+                      "tasks": [
+                        "task_ce4000e6",
+                        "task_f2b2ec36",
+                        "task_2eed16b9"
+                      ],
+                      "execution_type": "parallel",
+                      "wait_for_all": true
+                    }
+                  ],
+                  "dependencies": {},
+                  "timing_estimates": {
+                    "total_estimated_seconds": 300,
+                    "estimated_completion": "2025-10-28T22:55:18.931325",
+                    "sla_buffer_seconds": 300,
+                    "critical_path": [
+                      "task_ce4000e6"
+                    ]
+                  },
+                  "monitoring_checkpoints": [
+                    {
+                      "checkpoint_id": "checkpoint_0",
+                      "check_time_seconds": 75,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_1",
+                      "check_time_seconds": 150,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_2",
+                      "check_time_seconds": 225,
+                      "criteria": "agent_progress_check"
+                    },
+                    {
+                      "checkpoint_id": "checkpoint_3",
+                      "check_time_seconds": 300,
+                      "criteria": "agent_progress_check"
+                    }
+                  ]
+                },
+                "tasks_created": 3,
+                "execution_strategy": "concurrent",
+                "estimated_completion": "2025-10-28T22:55:18.931325",
+                "processing_timestamp": "2025-10-28T22:50:18.931325"
+              },
+              "completed_at": "2025-10-28T22:50:18.931325"
+            },
+            {
+              "step_id": "concurrent_execution",
+              "step_name": "Concurrent Data Collection",
+              "status": "completed",
+              "agents_executed": 3,
+              "completed_at": "2025-10-28T22:50:19.090684"
+            },
+            {
+              "step_id": "state_coordination",
+              "step_name": "Agent State Coordination",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "coordination_result": {
+                  "session_id": "2e71ea6f-953a-4b32-8dca-92becd9ff3eb",
+                  "action": "sync",
+                  "agents_coordinated": [
+                    "initial_data_collection_agent",
+                    "confirmation_data_agent",
+                    "documentation_agent"
+                  ],
+                  "state_updates": {
+                    "initial_data_collection_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    },
+                    "confirmation_data_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    },
+                    "documentation_agent": {
+                      "previous_status": "completed",
+                      "current_status": "completed",
+                      "conflicts_resolved": 0
+                    }
+                  },
+                  "synchronization_status": "success",
+                  "conflicts_resolved": 0
+                },
+                "processing_timestamp": "2025-10-28T22:50:19.095778"
+              },
+              "completed_at": "2025-10-28T22:50:19.097523"
+            },
+            {
+              "step_id": "progress_monitoring",
+              "step_name": "Progress Monitoring",
+              "status": "completed",
+              "result": {
+                "success": true,
+                "progress_metrics": {
+                  "session_id": "2e71ea6f-953a-4b32-8dca-92becd9ff3eb",
+                  "current_phase": "data_collection_concurrent",
+                  "monitoring_timestamp": "2025-10-28T22:50:19.188203",
+                  "steps_total": 4,
+                  "steps_completed": 4,
+                  "progress_percentage": 100.0,
+                  "elapsed_time_seconds": 0.35,
+                  "elapsed_time_minutes": 0.01,
+                  "overall_quality_score": 78.6,
+                  "estimated_completion_minutes": 0,
+                  "estimated_completion_time": "2025-10-28T22:50:19.192202"
+                },
+                "agent_analysis": {
+                  "initial_data_collection_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 2.5,
+                    "quality_score": 85.0
+                  },
+                  "confirmation_data_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 3.2,
+                    "quality_score": 78.5
+                  },
+                  "documentation_agent": {
+                    "status": "unknown",
+                    "success": true,
+                    "processing_time": 4.1,
+                    "quality_score": 72.3
+                  }
+                },
+                "sla_analysis": {
+                  "status": "compliant",
+                  "violations": [],
+                  "warnings": [],
+                  "time_remaining_minutes": 29.99
+                },
+                "next_actions": [
+                  "Continuar monitoreo normal"
+                ],
+                "escalation_needed": false,
+                "quality_gates": {
+                  "passed": 3,
+                  "total": 3,
+                  "overall_score": 78.60000000000001
+                },
+                "processing_timestamp": "2025-10-28T22:50:19.192202"
+              },
+              "completed_at": "2025-10-28T22:50:19.247742"
+            },
+            {
+              "step_id": "data_aggregation",
+              "step_name": "Data Aggregation",
+              "status": "completed",
+              "result": {
+                "employee_data": {
+                  "employee_id": "EMP_ORCH_001",
+                  "first_name": "Carlos",
+                  "middle_name": "Alberto",
+                  "last_name": "Gonz\u00e1lez P\u00e9rez",
+                  "preferred_name": "Carlos",
+                  "email": "carlos.gonzalez@empresa.com",
+                  "phone": "+506-8888-9999",
+                  "id_card": "1-1234-5678",
+                  "passport": "CR123456789",
+                  "employment_type": "full_time",
+                  "position_level": "senior",
+                  "department": "Engineering",
+                  "hire_date": "2025-11-11T16:50:18.786963",
+                  "manager_email": "manager@empresa.com"
+                },
+                "validation_results": {
+                  "data_collection": {
+                    "score": 85.0,
+                    "status": "completed"
+                  },
+                  "contract_validation": {
+                    "score": 78.5,
+                    "contract_validated": true,
+                    "offer_generated": true
+                  },
+                  "documentation": {
+                    "compliance_score": 72.3,
+                    "documents_validated": 4,
+                    "validation_status": "requires_review"
+                  }
+                },
+                "processing_summary": {
+                  "agents_executed": 3,
+                  "successful_agents": 3,
+                  "total_processing_time": 9.8,
+                  "overall_success": true,
+                  "overall_quality_score": 78.60000000000001
+                }
+              },
+              "completed_at": "2025-10-28T22:50:19.317178"
+            }
+          ],
+          "errors": [],
+          "started_at": "2025-10-28T22:50:18.841915",
+          "completed_at": "2025-10-28T22:50:19.354519"
+        },
+        "data_collection_phase": "completed"
+      },
+      "validation_results": {},
+      "agent_states": {
+        "initial_data_collection_agent": {
+          "agent_id": "initial_data_collection_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:50:18.947062",
+          "data": {
+            "success": true,
+            "agent_id": "initial_data_collection_agent",
+            "processing_time": 2.5,
+            "structured_data": {
+              "employee_id": "EMP_ORCH_001",
+              "first_name": "Carlos",
+              "middle_name": "Alberto",
+              "last_name": "Gonz\u00e1lez P\u00e9rez",
+              "preferred_name": "Carlos",
+              "email": "carlos.gonzalez@empresa.com",
+              "phone": "+506-8888-9999",
+              "id_card": "1-1234-5678",
+              "passport": "CR123456789",
+              "employment_type": "full_time",
+              "position_level": "senior",
+              "department": "Engineering",
+              "hire_date": "2025-11-11T16:50:18.786963",
+              "manager_email": "manager@empresa.com"
+            },
+            "validation_score": 85.0,
+            "completed_at": "2025-10-28T22:50:18.946063"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "confirmation_data_agent": {
+          "agent_id": "confirmation_data_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:50:18.992006",
+          "data": {
+            "success": true,
+            "agent_id": "confirmation_data_agent",
+            "processing_time": 3.2,
+            "validation_score": 78.5,
+            "contract_validated": true,
+            "offer_generated": true,
+            "completed_at": "2025-10-28T22:50:18.946063"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-10-28T22:50:19.045722",
+          "data": {
+            "success": true,
+            "agent_id": "documentation_agent",
+            "processing_time": 4.1,
+            "compliance_score": 72.3,
+            "documents_validated": 4,
+            "validation_status": "requires_review",
+            "completed_at": "2025-10-28T22:50:18.947062"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-10-28T22:50:18.841915",
+      "updated_at": "2025-10-28T22:50:19.354519",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    }
+  },
+  "agent_registry": {
+    "test_agent": {
+      "agent_id": "test_agent",
+      "status": "processing",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-10-24T21:30:37.376599",
+      "data": {
+        "version": "1.0",
+        "current_task": "processing_email"
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "initial_data_collection": {
+      "agent_id": "initial_data_collection",
+      "status": "idle",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-10-28T22:50:18.511549",
+      "data": {
+        "version": "1.0",
+        "specialization": "data_extraction_validation",
+        "tools_count": 4
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "confirmation_data_agent": {
+      "agent_id": "confirmation_data_agent",
+      "status": "completed",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-10-28T22:50:18.992006",
+      "data": {
+        "version": "1.0",
+        "specialization": "contract_validation_offer_generation",
+        "tools_count": 4,
+        "validation_config": {
+          "salary_validation": true,
+          "policy_compliance": true,
+          "minimum_score": 0.85
+        },
+        "success": true,
+        "agent_id": "confirmation_data_agent",
+        "processing_time": 3.2,
+        "validation_score": 78.5,
+        "contract_validated": true,
+        "offer_generated": true,
+        "completed_at": "2025-10-28T22:50:18.946063"
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "documentation_agent": {
+      "agent_id": "documentation_agent",
+      "status": "completed",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-10-28T22:50:19.045722",
+      "data": {
+        "version": "1.0",
+        "specialization": "document_analysis_validation",
+        "tools_count": 4,
+        "supported_documents": [
+          "vaccination_card",
+          "id_document",
+          "cv_resume",
+          "personnel_form",
+          "photo",
+          "background_check",
+          "academic_titles"
+        ],
+        "validation_capabilities": {
+          "medical_validation": true,
+          "id_authentication": true,
+          "academic_verification": true,
+          "document_analysis": true
+        },
+        "success": true,
+        "agent_id": "documentation_agent",
+        "processing_time": 4.1,
+        "compliance_score": 72.3,
+        "documents_validated": 4,
+        "validation_status": "requires_review",
+        "completed_at": "2025-10-28T22:50:18.947062"
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "orchestrator_agent": {
+      "agent_id": "orchestrator_agent",
+      "status": "processing",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-10-28T22:50:18.794158",
+      "data": {
+        "version": "1.0",
+        "specialization": "workflow_orchestration_coordination",
+        "tools_count": 4,
+        "workflow_capabilities": {
+          "concurrent_orchestration": true,
+          "langgraph_workflows": true,
+          "multi_agent_coordination": true,
+          "progress_monitoring": true,
+          "error_handling": true
+        },
+        "supported_patterns": [
+          "concurrent_data_collection",
+          "sequential_processing",
+          "error_recovery",
+          "escalation_handoff"
+        ],
+        "workflow_status": {
+          "workflow_available": true,
+          "agents_initialized": 3,
+          "total_agents": 3,
+          "workflow_nodes": 10
+        },
+        "current_task": "workflow_orchestration",
+        "orchestration_id": "orch_20251028_225018_EMP_ORCH_001",
+        "employee_id": "EMP_ORCH_001",
+        "pattern": "concurrent_data_collection",
+        "required_agents": [
+          "initial_data_collection_agent",
+          "confirmation_data_agent",
+          "documentation_agent"
+        ],
+        "started_at": "2025-10-28T22:50:18.794158"
+      },
+      "errors": [],
+      "metadata": {}
+    }
+  },
+  "system_metrics": {},
+  "last_updated": "2025-10-28T22:50:19.354519"
+}
