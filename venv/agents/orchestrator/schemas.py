@@ -202,3 +202,138 @@ class TaskDistributionStrategy(BaseModel):
     dependency_rules: Dict[str, List[str]] = Field(default_factory=dict)
     timeout_settings: Dict[str, int] = Field(default_factory=dict)
     retry_policies: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
+
+
+    # Agregar después de las clases existentes, antes de DEFAULT_QUALITY_GATES:
+
+class SequentialPipelinePhase(str, Enum):
+    """Fases específicas del Sequential Pipeline"""
+    PIPELINE_INITIATED = "pipeline_initiated"
+    IT_PROVISIONING = "it_provisioning"
+    CONTRACT_MANAGEMENT = "contract_management"
+    MEETING_COORDINATION = "meeting_coordination"
+    PIPELINE_COMPLETED = "pipeline_completed"
+
+class PipelineAgentResult(BaseModel):
+    """Resultado estándar de agente del pipeline secuencial"""
+    agent_id: str
+    employee_id: str
+    session_id: str
+    success: bool
+    processing_time: float
+    
+    # Agent-specific data
+    agent_output: Dict[str, Any] = Field(default_factory=dict)
+    next_agent_input: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Quality and validation
+    quality_score: float = Field(ge=0.0, le=100.0, default=0.0)
+    validation_passed: bool = False
+    ready_for_next_stage: bool = False
+    
+    # Error handling
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    requires_manual_review: bool = False
+    
+    # Timing and metadata
+    started_at: datetime
+    completed_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SequentialPipelineRequest(BaseModel):
+    """Solicitud para iniciar Sequential Pipeline"""
+    employee_id: str
+    session_id: str
+    orchestration_id: str
+    
+    # Input from Data Aggregator
+    consolidated_data: Dict[str, Any]
+    aggregation_result: Dict[str, Any]
+    data_quality_score: float
+    
+    # Pipeline configuration
+    pipeline_priority: Priority = Priority.MEDIUM
+    quality_gates_enabled: bool = True
+    sla_monitoring_enabled: bool = True
+    auto_escalation_enabled: bool = True
+    
+    # Agent-specific configurations
+    it_provisioning_config: Dict[str, Any] = Field(default_factory=dict)
+    contract_management_config: Dict[str, Any] = Field(default_factory=dict)
+    meeting_coordination_config: Dict[str, Any] = Field(default_factory=dict)
+
+class SequentialPipelineResult(BaseModel):
+    """Resultado completo del Sequential Pipeline"""
+    success: bool
+    employee_id: str
+    session_id: str
+    orchestration_id: str
+    pipeline_id: str = Field(default_factory=lambda: f"PIPE-{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}")
+    
+    # Phase results
+    it_provisioning_result: Optional[PipelineAgentResult] = None
+    contract_management_result: Optional[PipelineAgentResult] = None
+    meeting_coordination_result: Optional[PipelineAgentResult] = None
+    
+    # Final pipeline data
+    employee_ready_for_onboarding: bool = False
+    onboarding_timeline: Optional[Dict[str, Any]] = None
+    stakeholders_engaged: List[str] = Field(default_factory=list)
+    
+    # Pipeline metrics
+    total_processing_time: float = 0.0
+    stages_completed: int = 0
+    stages_total: int = 3
+    overall_quality_score: float = Field(ge=0.0, le=100.0, default=0.0)
+    
+    # Quality gates and SLA
+    quality_gates_passed: int = 0
+    quality_gates_failed: int = 0
+    sla_breaches: int = 0
+    escalations_triggered: int = 0
+    
+    # Next steps
+    next_actions: List[str] = Field(default_factory=list)
+    requires_followup: bool = False
+    
+    # Error handling
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    
+    # Timestamps
+    started_at: datetime
+    completed_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+# Agregar también al final del archivo, después de DEFAULT_ESCALATION_RULES:
+
+# Sequential Pipeline Stage Dependencies
+PIPELINE_STAGE_DEPENDENCIES = {
+    SequentialPipelinePhase.IT_PROVISIONING: [],  # No dependencies, can start immediately
+    SequentialPipelinePhase.CONTRACT_MANAGEMENT: [SequentialPipelinePhase.IT_PROVISIONING],
+    SequentialPipelinePhase.MEETING_COORDINATION: [SequentialPipelinePhase.CONTRACT_MANAGEMENT],
+}
+
+# Sequential Pipeline Quality Gate Requirements
+PIPELINE_QUALITY_REQUIREMENTS = {
+    SequentialPipelinePhase.IT_PROVISIONING: {
+        "min_quality_score": 85.0,
+        "required_outputs": ["credentials_created", "equipment_assigned", "access_granted"],
+        "blocking_issues": ["security_clearance_failed", "equipment_unavailable"]
+    },
+    SequentialPipelinePhase.CONTRACT_MANAGEMENT: {
+        "min_quality_score": 90.0,
+        "required_outputs": ["contract_generated", "legal_validation_passed", "signatures_completed"],
+        "blocking_issues": ["legal_compliance_failed", "signature_process_failed"]
+    },
+    SequentialPipelinePhase.MEETING_COORDINATION: {
+        "min_quality_score": 80.0,
+        "required_outputs": ["stakeholders_identified", "meetings_scheduled", "timeline_created"],
+        "blocking_issues": ["critical_stakeholders_unavailable", "calendar_system_error"]
+    }
+}

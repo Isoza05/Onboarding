@@ -1994,6 +1994,1328 @@
       "priority": 1,
       "requires_manual_review": false,
       "config": {}
+    },
+    "test_progress_session_20251104_170416": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251104_170416",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-04T22:39:16.534330",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:04:16.570565",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:04:16.596062",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:04:16.619763",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:04:16.642323",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:04:16.759952",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251104_230416_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-04T23:04:16.731281",
+            "errors": [
+              "'NoneType' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-04T23:04:16.759952"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-04T23:04:16.534330",
+      "updated_at": "2025-11-04T23:04:16.759952",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251104_170555": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251104_170555",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-04T22:40:55.033757",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:05:55.060603",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:05:55.088355",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:05:55.112722",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:05:55.139975",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:05:55.279261",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251104_230555_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-04T23:05:55.245379",
+            "errors": [
+              "'NoneType' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-04T23:05:55.279261"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-04T23:05:55.033757",
+      "updated_at": "2025-11-04T23:05:55.279261",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251104_172052": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251104_172052",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-04T22:55:52.325112",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:20:52.370550",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:20:52.410129",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:20:52.454181",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:20:52.496391",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-04T23:20:52.728000",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251104_232052_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-04T23:20:52.658815",
+            "errors": [
+              "'str' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-04T23:20:52.728000"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-04T23:20:52.325112",
+      "updated_at": "2025-11-04T23:20:52.728000",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_093321": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_093321",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T15:08:21.239542",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:33:21.268310",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:33:21.343734",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:33:21.367456",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:33:21.395879",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:33:21.525798",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251105_153321_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T15:33:21.486884",
+            "errors": [
+              "'NoneType' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-05T15:33:21.525798"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T15:33:21.239542",
+      "updated_at": "2025-11-05T15:33:21.525798",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_094237": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_094237",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T15:17:37.434459",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:42:37.517313",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:42:37.588127",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:42:37.652436",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:42:37.707789",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:42:38.001358",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251105_154237_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T15:42:37.925044",
+            "errors": [
+              "'NoneType' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-05T15:42:38.000361"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T15:42:37.434459",
+      "updated_at": "2025-11-05T15:42:38.001358",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_094556": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_094556",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T15:20:56.007187",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:45:56.041048",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:45:56.076746",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:45:56.111842",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:45:56.147189",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:45:56.318410",
+          "data": {
+            "current_task": "error",
+            "tracker_id": "track_20251105_154556_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T15:45:56.275340",
+            "errors": [
+              "'NoneType' object has no attribute 'get'"
+            ],
+            "failed_at": "2025-11-05T15:45:56.318410"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T15:45:56.007187",
+      "updated_at": "2025-11-05T15:45:56.318410",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_094906": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_094906",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T15:24:06.799536",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:49:06.829546",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:49:06.855211",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:49:06.884136",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T15:49:06.940695",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T15:49:06.799536",
+      "updated_at": "2025-11-05T15:49:06.940695",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_100016": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_100016",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T15:35:16.925088",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T16:00:16.973769",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T16:00:17.014801",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T16:00:17.045514",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T16:00:17.087495",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T16:00:17.390534",
+          "data": {
+            "current_task": "completed",
+            "tracker_id": "track_20251105_160017_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T16:00:17.270355",
+            "pipeline_health_score": 56.5,
+            "stages_monitored": 4,
+            "quality_gates_evaluated": 3,
+            "escalations_triggered": 0,
+            "tracking_status": "completed",
+            "completed_at": "2025-11-05T16:00:17.390534"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T16:00:16.925088",
+      "updated_at": "2025-11-05T16:00:17.390534",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_112257": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_112257",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T16:57:57.233702",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T17:22:57.279907",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T17:22:57.328490",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T17:22:57.370943",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T17:22:57.416328",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T17:22:57.690044",
+          "data": {
+            "current_task": "completed",
+            "tracker_id": "track_20251105_172257_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T17:22:57.556437",
+            "pipeline_health_score": 56.5,
+            "stages_monitored": 4,
+            "quality_gates_evaluated": 3,
+            "escalations_triggered": 0,
+            "tracking_status": "completed",
+            "completed_at": "2025-11-05T17:22:57.690044"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T17:22:57.234704",
+      "updated_at": "2025-11-05T17:22:57.690044",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_141124": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_141124",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T19:46:24.474935",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:11:24.524544",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:11:24.576260",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:11:24.617312",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:11:24.661194",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:11:24.937756",
+          "data": {
+            "current_task": "completed",
+            "tracker_id": "track_20251105_201124_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T20:11:24.822030",
+            "pipeline_health_score": 50.0,
+            "stages_monitored": 0,
+            "quality_gates_evaluated": 0,
+            "escalations_triggered": 0,
+            "tracking_status": "completed",
+            "completed_at": "2025-11-05T20:11:24.937756"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T20:11:24.476444",
+      "updated_at": "2025-11-05T20:11:24.937756",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_143205": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_143205",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T20:07:05.802848",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:32:05.850049",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:32:05.899510",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:32:05.953263",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:32:06.000321",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:32:06.290270",
+          "data": {
+            "current_task": "completed",
+            "tracker_id": "track_20251105_203206_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T20:32:06.182423",
+            "pipeline_health_score": 56.5,
+            "stages_monitored": 4,
+            "quality_gates_evaluated": 3,
+            "escalations_triggered": 0,
+            "tracking_status": "completed",
+            "completed_at": "2025-11-05T20:32:06.290270"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T20:32:05.802848",
+      "updated_at": "2025-11-05T20:32:06.290270",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "test_progress_session_20251105_144227": {
+      "employee_id": "EMP_TRACK_001",
+      "session_id": "test_progress_session_20251105_144227",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_TRACK_001",
+        "employee_data": {
+          "first_name": "Mar\u00eda",
+          "last_name": "Fern\u00e1ndez",
+          "email": "maria.fernandez@empresa.com",
+          "department": "Engineering",
+          "position": "Senior Software Engineer"
+        },
+        "started_at": "2025-11-05T20:17:27.763648",
+        "phase": "processing_pipeline"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "data_aggregator_agent": {
+          "agent_id": "data_aggregator_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:42:27.948700",
+          "data": {
+            "aggregation_completed": true,
+            "overall_quality_score": 78.5,
+            "validation_passed": true,
+            "ready_for_sequential": true,
+            "completeness_score": 85.0,
+            "consistency_score": 82.0,
+            "processing_time": 4.2
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:42:28.047432",
+          "data": {
+            "credentials_created": true,
+            "system_access_configured": true,
+            "equipment_assigned": true,
+            "security_clearance_assigned": true,
+            "provisioning_success_rate": 92.0,
+            "security_compliance_score": 96.0,
+            "processing_time": 8.7
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:42:28.160072",
+          "data": {
+            "contract_generated": true,
+            "legal_validation_passed": false,
+            "signature_process_complete": false,
+            "document_archived": false,
+            "compliance_score": 88.0,
+            "processing_time": 12.3
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "meeting_coordination_agent": {
+          "agent_id": "meeting_coordination_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:42:28.413434",
+          "data": {
+            "status": "waiting_for_contract_completion"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "progress_tracker_agent": {
+          "agent_id": "progress_tracker_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-05T20:42:29.641246",
+          "data": {
+            "current_task": "completed",
+            "tracker_id": "track_20251105_204229_health_check",
+            "employee_id": "health_check",
+            "monitoring_scope": "pipeline_health",
+            "started_at": "2025-11-05T20:42:29.450459",
+            "pipeline_health_score": 67.61111111111111,
+            "stages_monitored": 4,
+            "quality_gates_evaluated": 3,
+            "escalations_triggered": 0,
+            "tracking_status": "completed",
+            "completed_at": "2025-11-05T20:42:29.641246"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-05T20:42:27.763648",
+      "updated_at": "2025-11-05T20:42:29.641246",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
     }
   },
   "agent_registry": {
@@ -2015,7 +3337,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-10-28T22:50:18.511549",
+      "last_updated": "2025-11-07T00:48:18.472640",
       "data": {
         "version": "1.0",
         "specialization": "data_extraction_validation",
@@ -2026,10 +3348,10 @@
     },
     "confirmation_data_agent": {
       "agent_id": "confirmation_data_agent",
-      "status": "completed",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-10-28T22:50:18.992006",
+      "last_updated": "2025-11-07T00:48:18.515664",
       "data": {
         "version": "1.0",
         "specialization": "contract_validation_offer_generation",
@@ -2038,24 +3360,17 @@
           "salary_validation": true,
           "policy_compliance": true,
           "minimum_score": 0.85
-        },
-        "success": true,
-        "agent_id": "confirmation_data_agent",
-        "processing_time": 3.2,
-        "validation_score": 78.5,
-        "contract_validated": true,
-        "offer_generated": true,
-        "completed_at": "2025-10-28T22:50:18.946063"
+        }
       },
       "errors": [],
       "metadata": {}
     },
     "documentation_agent": {
       "agent_id": "documentation_agent",
-      "status": "completed",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-10-28T22:50:19.045722",
+      "last_updated": "2025-11-07T00:48:18.575845",
       "data": {
         "version": "1.0",
         "specialization": "document_analysis_validation",
@@ -2074,14 +3389,7 @@
           "id_authentication": true,
           "academic_verification": true,
           "document_analysis": true
-        },
-        "success": true,
-        "agent_id": "documentation_agent",
-        "processing_time": 4.1,
-        "compliance_score": 72.3,
-        "documents_validated": 4,
-        "validation_status": "requires_review",
-        "completed_at": "2025-10-28T22:50:18.947062"
+        }
       },
       "errors": [],
       "metadata": {}
@@ -2138,7 +3446,7 @@
       "status": "completed",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-10-29T21:50:24.575666",
+      "last_updated": "2025-11-05T20:42:27.948700",
       "data": {
         "version": "1.0",
         "specialization": "data_aggregation_cross_validation",
@@ -2164,22 +3472,186 @@
             "documentation_agent"
           ]
         },
-        "current_task": "completed",
-        "aggregation_id": "agg_20251029_215024_EMP_AGG_001",
-        "employee_id": "EMP_AGG_001",
-        "validation_level": "standard",
-        "sources_count": 3,
-        "started_at": "2025-10-29T21:50:24.488081",
-        "quality_score": 71.5,
-        "ready_for_pipeline": true,
-        "validation_passed": false,
-        "requires_review": true,
-        "completed_at": "2025-10-29T21:50:24.575666"
+        "aggregation_completed": true,
+        "overall_quality_score": 78.5,
+        "validation_passed": true,
+        "ready_for_sequential": true,
+        "completeness_score": 85.0,
+        "consistency_score": 82.0,
+        "processing_time": 4.2
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "it_provisioning_agent": {
+      "agent_id": "it_provisioning_agent",
+      "status": "idle",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-07T00:48:18.817398",
+      "data": {
+        "version": "1.0",
+        "specialization": "it_provisioning_credential_management",
+        "tools_count": 4,
+        "capabilities": {
+          "credential_generation": true,
+          "equipment_allocation": true,
+          "access_management": true,
+          "security_configuration": true,
+          "it_communication": true
+        },
+        "security_levels": [
+          "basic",
+          "standard",
+          "elevated",
+          "executive"
+        ],
+        "equipment_types": [
+          "laptop",
+          "monitor",
+          "peripherals",
+          "mobile"
+        ],
+        "integration_points": [
+          "it_department_simulator",
+          "common_state",
+          "contract_agent"
+        ]
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "contract_management_agent": {
+      "agent_id": "contract_management_agent",
+      "status": "idle",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-07T00:48:18.851717",
+      "data": {
+        "version": "1.0",
+        "specialization": "legal_contract_signature_management",
+        "tools_count": 4,
+        "capabilities": {
+          "contract_generation": true,
+          "legal_validation": true,
+          "signature_management": true,
+          "document_archival": true,
+          "compliance_verification": true
+        },
+        "contract_types": [
+          "full_time",
+          "part_time",
+          "contractor",
+          "internship",
+          "executive"
+        ],
+        "compliance_levels": [
+          "basic",
+          "standard",
+          "enhanced",
+          "executive"
+        ],
+        "jurisdictions": [
+          "Costa Rica"
+        ],
+        "integration_points": [
+          "hr_department_simulator",
+          "common_state",
+          "meeting_agent"
+        ]
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "meeting_coordination_agent": {
+      "agent_id": "meeting_coordination_agent",
+      "status": "idle",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-07T00:48:18.883012",
+      "data": {
+        "version": "1.0",
+        "specialization": "meeting_coordination_calendar_management",
+        "tools_count": 4,
+        "capabilities": {
+          "stakeholder_identification": true,
+          "calendar_analysis": true,
+          "meeting_optimization": true,
+          "invitation_management": true,
+          "conflict_resolution": true,
+          "reminder_system": true
+        },
+        "supported_platforms": [
+          "microsoft_teams",
+          "outlook",
+          "google_calendar"
+        ],
+        "meeting_types": [
+          "welcome_meeting",
+          "hr_orientation",
+          "it_setup",
+          "team_introduction",
+          "manager_checkin",
+          "training_session",
+          "project_briefing",
+          "buddy_assignment"
+        ],
+        "integration_points": {
+          "calendar_system": "microsoft_outlook",
+          "notification_system": "active",
+          "stakeholder_directory": "integrated"
+        }
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "progress_tracker_agent": {
+      "agent_id": "progress_tracker_agent",
+      "status": "idle",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-07T00:48:18.758875",
+      "data": {
+        "version": "1.0",
+        "specialization": "pipeline_monitoring_quality_assurance",
+        "tools_count": 4,
+        "capabilities": {
+          "step_completion_monitoring": true,
+          "quality_gate_validation": true,
+          "sla_monitoring": true,
+          "escalation_management": true,
+          "real_time_tracking": true,
+          "predictive_analytics": true
+        },
+        "monitoring_scope": [
+          "sequential_pipeline",
+          "quality_gates",
+          "sla_compliance"
+        ],
+        "escalation_levels": [
+          "none",
+          "warning",
+          "critical",
+          "emergency"
+        ],
+        "supported_stages": [
+          "data_collection",
+          "data_aggregation",
+          "it_provisioning",
+          "contract_management",
+          "meeting_coordination"
+        ],
+        "integration_points": {
+          "state_management": "active",
+          "quality_gates": "enforced",
+          "sla_monitoring": "real_time",
+          "escalation_system": "automated"
+        }
       },
       "errors": [],
       "metadata": {}
     }
   },
   "system_metrics": {},
-  "last_updated": "2025-10-29T21:50:24.575666"
+  "last_updated": "2025-11-07T00:48:18.883012"
 }

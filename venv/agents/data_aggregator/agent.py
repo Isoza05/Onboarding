@@ -454,59 +454,65 @@ Ejecuta consolidación, validación cruzada y evaluación de calidad completa.
 
             # Si el procesamiento fue exitoso, actualizar State Management
             if result["success"]:
-                # Actualizar datos del empleado en State Management
+                # Actualizar datos del empleado
                 if session_id:
-                    aggregated_data = {
-                        "aggregation_completed": True,
-                        "aggregation_id": aggregation_id,
-                        "consolidated_data": result.get("consolidated_data", {}),
-                        "quality_metrics": {
-                            "overall_quality_score": result.get("overall_quality_score", 0),
-                            "completeness_score": result.get("completeness_score", 0),
-                            "consistency_score": result.get("consistency_score", 0)
-                        },
-                        "pipeline_readiness": result.get("pipeline_readiness", {}),
-                        "ready_for_sequential": result.get("ready_for_sequential_pipeline", False),
-                        "next_phase": result.get("next_phase", "sequential_processing_pipeline")
+                    tracking_data = {
+                        "progress_tracking_completed": True,
+                        "tracker_id": tracker_id,
+                        "pipeline_health_score": result.get("pipeline_health_score", 0),
+                        "completion_confidence": result.get("completion_confidence", 0),
+                        "pipeline_blocked": result.get("pipeline_blocked", False),
+                        "escalation_required": result.get("escalation_required", False),
+                        "estimated_completion": result.get("estimated_time_remaining_minutes", 0),
+                        "monitoring_timestamp": datetime.utcnow().isoformat(),
+                        "stages_monitored": result.get("stages_monitored", 0),
+                        "quality_gates_evaluated": result.get("quality_gates_evaluated", 0),
+                        "sla_breaches_detected": result.get("sla_breaches_detected", 0),
+                        "escalations_triggered": result.get("escalations_triggered", 0)
                     }
                     
-                    state_manager.update_employee_data(
-                        session_id,
-                        aggregated_data,
-                        "processed"
-                    )
-
-                # Actualizar estado del agregador: COMPLETED
+                    try:
+                        state_manager.update_employee_data(
+                            session_id,
+                            tracking_data,
+                            "monitored"
+                        )
+                        self.logger.info(f"Tracking data updated in State Management for session {session_id}")
+                    except Exception as e:
+                        self.logger.error(f"Error updating employee data: {e}")
+                
+                # Actualizar estado: COMPLETED
                 state_manager.update_agent_state(
                     self.agent_id,
                     AgentStateStatus.COMPLETED,
                     {
                         "current_task": "completed",
-                        "aggregation_id": aggregation_id,
-                        "quality_score": result.get("overall_quality_score", 0),
-                        "ready_for_pipeline": result.get("ready_for_sequential_pipeline", False),
-                        "validation_passed": result.get("validation_passed", False),
-                        "requires_review": result.get("requires_manual_review", False),
+                        "tracker_id": tracker_id,
+                        "pipeline_health_score": result.get("pipeline_health_score", 0),
+                        "stages_monitored": result.get("stages_monitored", 0),
+                        "quality_gates_evaluated": result.get("quality_gates_evaluated", 0),
+                        "escalations_triggered": result.get("escalations_triggered", 0),
+                        "tracking_status": result.get("tracking_status", "completed"),
                         "completed_at": datetime.utcnow().isoformat()
                     },
                     session_id
                 )
                 
-                # Registrar en agregaciones activas
-                self.active_aggregations[aggregation_id] = {
+                # Registrar en sesiones activas
+                self.active_monitoring_sessions[tracker_id] = {
                     "status": "completed",
                     "result": result,
                     "completed_at": datetime.utcnow()
                 }
-
+                
             else:
-                # Error en agregación
+                # Error en tracking
                 state_manager.update_agent_state(
                     self.agent_id,
                     AgentStateStatus.ERROR,
                     {
                         "current_task": "error",
-                        "aggregation_id": aggregation_id,
+                        "tracker_id": tracker_id,
                         "errors": result.get("errors", []),
                         "failed_at": datetime.utcnow().isoformat()
                     },
