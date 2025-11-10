@@ -3316,6 +3316,627 @@
       "priority": 1,
       "requires_manual_review": false,
       "config": {}
+    },
+    "dfb40a29-c0f5-483f-a99c-0b965c4a6e6e": {
+      "employee_id": "EMP_ERROR_TEST_001",
+      "session_id": "dfb40a29-c0f5-483f-a99c-0b965c4a6e6e",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_ERROR_TEST_001",
+        "first_name": "Test",
+        "last_name": "Employee",
+        "email": "test.employee@company.com",
+        "department": "IT",
+        "position": "Software Engineer",
+        "priority": "high"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T14:47:31.618505",
+          "data": {
+            "started_at": "2025-11-10T14:47:31.617476",
+            "current_task": "provisioning_credentials",
+            "timeout_risk": true
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T14:47:31.672597",
+          "data": {
+            "error_count": 4,
+            "last_error": "Legal validation service unavailable",
+            "failed_operations": [
+              "contract_generation",
+              "legal_validation"
+            ]
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "error_classification_agent": {
+          "agent_id": "error_classification_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T14:47:31.842091",
+          "data": {
+            "current_task": "completed",
+            "classification_id": "class_20251110_144731_EMP_ERROR_TEST_001",
+            "employee_id": "EMP_ERROR_TEST_001",
+            "error_source": "progress_tracker",
+            "started_at": "2025-11-10T14:47:31.722935",
+            "errors_classified": 4,
+            "global_severity": "emergency",
+            "recovery_strategy": "escalation_required",
+            "next_handler": "human_handoff_agent:manual_intervention_handler",
+            "completed_at": "2025-11-10T14:47:31.842091"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T14:47:31.562262",
+      "updated_at": "2025-11-10T14:47:31.842091",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "7adc9bd6-d296-473b-b8ac-d8b5a8100174": {
+      "employee_id": "EMP_RECOVERY_TEST_001",
+      "session_id": "7adc9bd6-d296-473b-b8ac-d8b5a8100174",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_RECOVERY_TEST_001",
+        "first_name": "Recovery",
+        "last_name": "Test",
+        "email": "recovery.test@company.com",
+        "department": "IT",
+        "position": "Test Engineer",
+        "priority": "high"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:21.544662",
+          "data": {
+            "error_count": 4,
+            "last_error": "Timeout connecting to provisioning service",
+            "consecutive_failures": 3,
+            "last_attempt": "2025-11-10T15:19:15.403277",
+            "failed_operations": [
+              "create_user_account",
+              "assign_equipment"
+            ],
+            "restored_at": "2025-11-10T15:19:21.544662",
+            "restored_from": "error",
+            "restoration_reason": "recovery_state_restoration"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:15.446655",
+          "data": {
+            "started_at": "2025-11-10T14:34:15.446655",
+            "current_operation": "legal_validation",
+            "timeout_risk": true,
+            "processing_duration": 2700
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:15.494806",
+          "data": {
+            "data_corruption_detected": true,
+            "validation_score": 0.0,
+            "output_corrupted": true,
+            "requires_reprocessing": true
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:22.082844",
+          "data": {
+            "current_task": "completed",
+            "recovery_id": "982f1f70-3ed9-4773-b47a-1a955734624a",
+            "employee_id": "EMP_RECOVERY_TEST_001",
+            "recovery_strategy": "circuit_breaker",
+            "recovery_priority": "medium",
+            "started_at": "2025-11-10T15:19:21.965938",
+            "errors": [],
+            "failed_at": "2025-11-10T15:19:21.767057",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 1,
+            "completed_at": "2025-11-10T15:19:22.082844"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:19:15.350681",
+      "updated_at": "2025-11-10T15:19:22.082844",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "f5523018-ed40-4e94-ad12-42acb25284a0": {
+      "employee_id": "EMP_SCENARIO_TEST",
+      "session_id": "f5523018-ed40-4e94-ad12-42acb25284a0",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_SCENARIO_TEST",
+        "first_name": "Scenario",
+        "last_name": "Test"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:33.235675",
+          "data": {
+            "current_task": "completed",
+            "recovery_id": "f50aa039-449d-40a7-8eea-aee00227f035",
+            "employee_id": "EMP_SCENARIO_TEST",
+            "recovery_strategy": "graceful_degradation",
+            "recovery_priority": "high",
+            "started_at": "2025-11-10T15:19:32.918073",
+            "errors": [],
+            "failed_at": "2025-11-10T15:19:32.353889",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 3,
+            "completed_at": "2025-11-10T15:19:33.235675"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "initial_data_collection_agent": {
+          "agent_id": "initial_data_collection_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:32.979640",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:19:32.979640",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "confirmation_data_agent": {
+          "agent_id": "confirmation_data_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:33.074646",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:19:33.074646",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:19:33.127252",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:19:33.127252",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:19:22.219464",
+      "updated_at": "2025-11-10T15:19:33.235675",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "06c5951e-ad22-4f6d-9b06-c99459039143": {
+      "employee_id": "EMP_RECOVERY_TEST_001",
+      "session_id": "06c5951e-ad22-4f6d-9b06-c99459039143",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_RECOVERY_TEST_001",
+        "first_name": "Recovery",
+        "last_name": "Test",
+        "email": "recovery.test@company.com",
+        "department": "IT",
+        "position": "Test Engineer",
+        "priority": "high"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:08.282388",
+          "data": {
+            "error_count": 4,
+            "last_error": "Timeout connecting to provisioning service",
+            "consecutive_failures": 3,
+            "last_attempt": "2025-11-10T15:28:02.165608",
+            "failed_operations": [
+              "create_user_account",
+              "assign_equipment"
+            ],
+            "restored_at": "2025-11-10T15:28:08.282388",
+            "restored_from": "error",
+            "restoration_reason": "recovery_state_restoration"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:02.201187",
+          "data": {
+            "started_at": "2025-11-10T14:43:02.201187",
+            "current_operation": "legal_validation",
+            "timeout_risk": true,
+            "processing_duration": 2700
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:02.242224",
+          "data": {
+            "data_corruption_detected": true,
+            "validation_score": 0.0,
+            "output_corrupted": true,
+            "requires_reprocessing": true
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:13.001859",
+          "data": {
+            "current_task": "error",
+            "recovery_id": "457e0294-cc42-456d-82df-8e04f25dd11a",
+            "employee_id": "EMP_RECOVERY_TEST_001",
+            "recovery_strategy": "graceful_degradation",
+            "recovery_priority": "emergency",
+            "started_at": "2025-11-10T15:28:08.932167",
+            "errors": [],
+            "failed_at": "2025-11-10T15:28:13.001859",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 1,
+            "completed_at": "2025-11-10T15:28:08.867970"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:28:02.122315",
+      "updated_at": "2025-11-10T15:28:13.001859",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "0339d8aa-8c9a-4036-a71c-080c7c3132a0": {
+      "employee_id": "EMP_SCENARIO_TEST",
+      "session_id": "0339d8aa-8c9a-4036-a71c-080c7c3132a0",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_SCENARIO_TEST",
+        "first_name": "Scenario",
+        "last_name": "Test"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:24.022977",
+          "data": {
+            "current_task": "completed",
+            "recovery_id": "7e6393eb-619c-4820-b361-3b3bc23fd151",
+            "employee_id": "EMP_SCENARIO_TEST",
+            "recovery_strategy": "graceful_degradation",
+            "recovery_priority": "high",
+            "started_at": "2025-11-10T15:28:23.773494",
+            "errors": [],
+            "failed_at": "2025-11-10T15:28:23.235829",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 3,
+            "completed_at": "2025-11-10T15:28:24.022977"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "initial_data_collection_agent": {
+          "agent_id": "initial_data_collection_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:23.820268",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:28:23.820268",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "confirmation_data_agent": {
+          "agent_id": "confirmation_data_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:23.871190",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:28:23.871190",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:28:23.920250",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:28:23.920250",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:28:13.132056",
+      "updated_at": "2025-11-10T15:28:24.022977",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "7492a5e8-b4cf-47e2-9f2c-d61e4feae659": {
+      "employee_id": "EMP_RECOVERY_TEST_001",
+      "session_id": "7492a5e8-b4cf-47e2-9f2c-d61e4feae659",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_RECOVERY_TEST_001",
+        "first_name": "Recovery",
+        "last_name": "Test",
+        "email": "recovery.test@company.com",
+        "department": "IT",
+        "position": "Test Engineer",
+        "priority": "high"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "it_provisioning_agent": {
+          "agent_id": "it_provisioning_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:29:57.525945",
+          "data": {
+            "error_count": 4,
+            "last_error": "Timeout connecting to provisioning service",
+            "consecutive_failures": 3,
+            "last_attempt": "2025-11-10T15:29:51.355433",
+            "failed_operations": [
+              "create_user_account",
+              "assign_equipment"
+            ],
+            "restored_at": "2025-11-10T15:29:57.525945",
+            "restored_from": "error",
+            "restoration_reason": "recovery_state_restoration"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "contract_management_agent": {
+          "agent_id": "contract_management_agent",
+          "status": "processing",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:29:51.429068",
+          "data": {
+            "started_at": "2025-11-10T14:44:51.429068",
+            "current_operation": "legal_validation",
+            "timeout_risk": true,
+            "processing_duration": 2700
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:29:51.478023",
+          "data": {
+            "data_corruption_detected": true,
+            "validation_score": 0.0,
+            "output_corrupted": true,
+            "requires_reprocessing": true
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "error",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:30:02.286736",
+          "data": {
+            "current_task": "error",
+            "recovery_id": "a8ede044-adbb-427e-9c4a-bca563b48c2b",
+            "employee_id": "EMP_RECOVERY_TEST_001",
+            "recovery_strategy": "graceful_degradation",
+            "recovery_priority": "emergency",
+            "started_at": "2025-11-10T15:29:58.221268",
+            "errors": [],
+            "failed_at": "2025-11-10T15:30:02.286736",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 1,
+            "completed_at": "2025-11-10T15:29:58.152427"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:29:51.278104",
+      "updated_at": "2025-11-10T15:30:02.286736",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "9c9a6001-2062-4462-bb77-cc46ed1c1e9b": {
+      "employee_id": "EMP_SCENARIO_TEST",
+      "session_id": "9c9a6001-2062-4462-bb77-cc46ed1c1e9b",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_SCENARIO_TEST",
+        "first_name": "Scenario",
+        "last_name": "Test"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "recovery_agent": {
+          "agent_id": "recovery_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:30:13.347087",
+          "data": {
+            "current_task": "completed",
+            "recovery_id": "7ddb905e-46b7-430e-a1ad-c2a96984742d",
+            "employee_id": "EMP_SCENARIO_TEST",
+            "recovery_strategy": "graceful_degradation",
+            "recovery_priority": "high",
+            "started_at": "2025-11-10T15:30:13.098742",
+            "errors": [],
+            "failed_at": "2025-11-10T15:30:12.543903",
+            "recovery_status": "success",
+            "system_recovered": true,
+            "actions_executed": 3,
+            "completed_at": "2025-11-10T15:30:13.347087"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "initial_data_collection_agent": {
+          "agent_id": "initial_data_collection_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:30:13.163060",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:30:13.163060",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "confirmation_data_agent": {
+          "agent_id": "confirmation_data_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:30:13.206401",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:30:13.206401",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        },
+        "documentation_agent": {
+          "agent_id": "documentation_agent",
+          "status": "idle",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T15:30:13.249507",
+          "data": {
+            "full_restart": true,
+            "restart_timestamp": "2025-11-10T15:30:13.249507",
+            "restart_reason": "recovery_full_restart"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T15:30:02.431261",
+      "updated_at": "2025-11-10T15:30:13.347087",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
     }
   },
   "agent_registry": {
@@ -3351,7 +3972,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-07T00:48:18.515664",
+      "last_updated": "2025-11-10T15:30:13.206401",
       "data": {
         "version": "1.0",
         "specialization": "contract_validation_offer_generation",
@@ -3360,7 +3981,10 @@
           "salary_validation": true,
           "policy_compliance": true,
           "minimum_score": 0.85
-        }
+        },
+        "full_restart": true,
+        "restart_timestamp": "2025-11-10T15:30:13.206401",
+        "restart_reason": "recovery_full_restart"
       },
       "errors": [],
       "metadata": {}
@@ -3370,7 +3994,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-07T00:48:18.575845",
+      "last_updated": "2025-11-10T15:30:13.249507",
       "data": {
         "version": "1.0",
         "specialization": "document_analysis_validation",
@@ -3389,7 +4013,14 @@
           "id_authentication": true,
           "academic_verification": true,
           "document_analysis": true
-        }
+        },
+        "data_corruption_detected": true,
+        "validation_score": 0.0,
+        "output_corrupted": true,
+        "requires_reprocessing": true,
+        "full_restart": true,
+        "restart_timestamp": "2025-11-10T15:30:13.249507",
+        "restart_reason": "recovery_full_restart"
       },
       "errors": [],
       "metadata": {}
@@ -3488,7 +4119,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-07T00:48:18.817398",
+      "last_updated": "2025-11-10T15:29:57.525945",
       "data": {
         "version": "1.0",
         "specialization": "it_provisioning_credential_management",
@@ -3516,17 +4147,31 @@
           "it_department_simulator",
           "common_state",
           "contract_agent"
-        ]
+        ],
+        "started_at": "2025-11-10T14:47:31.617476",
+        "current_task": "provisioning_credentials",
+        "timeout_risk": true,
+        "error_count": 4,
+        "last_error": "Timeout connecting to provisioning service",
+        "consecutive_failures": 3,
+        "last_attempt": "2025-11-10T15:29:51.355433",
+        "failed_operations": [
+          "create_user_account",
+          "assign_equipment"
+        ],
+        "restored_at": "2025-11-10T15:29:57.525945",
+        "restored_from": "error",
+        "restoration_reason": "recovery_state_restoration"
       },
       "errors": [],
       "metadata": {}
     },
     "contract_management_agent": {
       "agent_id": "contract_management_agent",
-      "status": "idle",
+      "status": "processing",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-07T00:48:18.851717",
+      "last_updated": "2025-11-10T15:29:51.429068",
       "data": {
         "version": "1.0",
         "specialization": "legal_contract_signature_management",
@@ -3558,7 +4203,17 @@
           "hr_department_simulator",
           "common_state",
           "meeting_agent"
-        ]
+        ],
+        "error_count": 4,
+        "last_error": "Legal validation service unavailable",
+        "failed_operations": [
+          "contract_generation",
+          "legal_validation"
+        ],
+        "started_at": "2025-11-10T14:44:51.429068",
+        "current_operation": "legal_validation",
+        "timeout_risk": true,
+        "processing_duration": 2700
       },
       "errors": [],
       "metadata": {}
@@ -3650,8 +4305,144 @@
       },
       "errors": [],
       "metadata": {}
+    },
+    "error_classification_agent": {
+      "agent_id": "error_classification_agent",
+      "status": "completed",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-10T14:47:31.842091",
+      "data": {
+        "version": "1.0",
+        "specialization": "error_analysis_classification",
+        "tools_count": 4,
+        "capabilities": {
+          "error_detection": true,
+          "severity_analysis": true,
+          "root_cause_analysis": true,
+          "pattern_recognition": true,
+          "recovery_routing": true,
+          "escalation_management": true
+        },
+        "error_categories": [
+          "agent_failure",
+          "sla_breach",
+          "quality_failure",
+          "system_error",
+          "data_validation",
+          "integration_error",
+          "security_issue",
+          "business_rule_violation"
+        ],
+        "severity_levels": [
+          "low",
+          "medium",
+          "high",
+          "critical",
+          "emergency"
+        ],
+        "recovery_strategies": [
+          "automatic_retry",
+          "manual_intervention",
+          "escalation_required",
+          "rollback_recovery",
+          "human_handoff",
+          "system_restart",
+          "no_action"
+        ],
+        "integration_points": {
+          "progress_tracker": "active",
+          "recovery_agent": "target",
+          "human_handoff_agent": "target",
+          "state_management": "active",
+          "audit_trail": "active"
+        },
+        "current_task": "completed",
+        "classification_id": "class_20251110_144731_EMP_ERROR_TEST_001",
+        "employee_id": "EMP_ERROR_TEST_001",
+        "error_source": "progress_tracker",
+        "started_at": "2025-11-10T14:47:31.722935",
+        "errors_classified": 4,
+        "global_severity": "emergency",
+        "recovery_strategy": "escalation_required",
+        "next_handler": "human_handoff_agent:manual_intervention_handler",
+        "completed_at": "2025-11-10T14:47:31.842091"
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "recovery_agent": {
+      "agent_id": "recovery_agent",
+      "status": "completed",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-10T15:30:13.347087",
+      "data": {
+        "version": "1.0",
+        "specialization": "system_recovery_state_restoration",
+        "tools_count": 4,
+        "capabilities": {
+          "automatic_retry": true,
+          "state_restoration": true,
+          "circuit_breaker_management": true,
+          "workflow_resumption": true,
+          "rollback_recovery": true,
+          "graceful_degradation": true
+        },
+        "recovery_strategies": [
+          "immediate_retry",
+          "exponential_backoff",
+          "circuit_breaker",
+          "graceful_degradation",
+          "state_rollback",
+          "service_restart",
+          "escalate_to_human",
+          "bypass_and_continue"
+        ],
+        "recovery_actions": [
+          "agent_restart",
+          "pipeline_rollback",
+          "state_restoration",
+          "retry_operation",
+          "circuit_breaker_reset",
+          "dependency_check",
+          "resource_cleanup",
+          "cache_clear",
+          "service_health_check",
+          "configuration_reload",
+          "workflow_resumption"
+        ],
+        "recovery_priorities": [
+          "low",
+          "medium",
+          "high",
+          "critical",
+          "emergency"
+        ],
+        "integration_points": {
+          "error_classification_agent": "source",
+          "human_handoff_agent": "escalation_target",
+          "state_management": "active",
+          "observability": "active",
+          "circuit_breakers": "managed"
+        },
+        "current_task": "completed",
+        "recovery_id": "7ddb905e-46b7-430e-a1ad-c2a96984742d",
+        "employee_id": "EMP_SCENARIO_TEST",
+        "recovery_strategy": "graceful_degradation",
+        "recovery_priority": "high",
+        "started_at": "2025-11-10T15:30:13.098742",
+        "errors": [],
+        "failed_at": "2025-11-10T15:30:12.543903",
+        "recovery_status": "success",
+        "system_recovered": true,
+        "actions_executed": 3,
+        "completed_at": "2025-11-10T15:30:13.347087"
+      },
+      "errors": [],
+      "metadata": {}
     }
   },
   "system_metrics": {},
-  "last_updated": "2025-11-07T00:48:18.915751"
+  "last_updated": "2025-11-10T15:30:13.347087"
 }
