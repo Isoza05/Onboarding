@@ -3,894 +3,1330 @@ from langchain.tools import BaseTool
 from datetime import datetime, timedelta
 import json
 from .schemas import (
-    EscalationLevel, HandoffStatus, SpecialistType, NotificationChannel,
-    EscalationDepartment, SpecialistAssignment, ContextPackage, 
-    EscalationTicket, NotificationEvent
+    HandoffPriority, SpecialistType, SpecialistProfile, SpecialistAssignment,
+    ContextPackage, EscalationTicket, NotificationEvent, NotificationChannel,
+    HandoffStatus
 )
 
 class EscalationRouterTool(BaseTool):
     """Herramienta para determinar especialista apropiado"""
     name: str = "escalation_router_tool"
-    description: str = "Determina el especialista apropiado basado en tipo de error y contexto"
+    description: str = "Determina el especialista humano más apropiado basado en error y contexto"
 
-    def _run(self, error_classification: Dict[str, Any], 
-             escalation_level: str, session_id: str) -> Dict[str, Any]:
-        """Enrutar escalación al especialista apropiado"""
+    def _run(self, handoff_request: Dict[str, Any], 
+             available_specialists: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Enrutar a especialista apropiado"""
         try:
-            from core.state_management.state_manager import state_manager
+            # Simular base de datos de especialistas
+            if not available_specialists:
+                available_specialists = self._get_default_specialists()
             
-            # Obtener contexto del empleado
-            employee_context = state_manager.get_employee_context(session_id)
-            employee_id = employee_context.employee_id if employee_context else "unknown"
+            error_category = handoff_request.get("error_category", "")
+            error_severity = handoff_request.get("error_severity", "")
+            handoff_priority = handoff_request.get("handoff_priority", HandoffPriority.MEDIUM.value)
             
-            # Mapeo de categorías de error a especialistas
-            routing_matrix = {
-                "agent_failure": {
-                    "timeout": [SpecialistType.IT_SPECIALIST, SpecialistType.SYSTEM_ADMIN],
-                    "processing_error": [SpecialistType.IT_SPECIALIST, SpecialistType.SYSTEM_ADMIN],
-                    "resource_exhaustion": [SpecialistType.SYSTEM_ADMIN, SpecialistType.IT_SPECIALIST]
-                },
-                "sla_breach": {
-                    "critical": [SpecialistType.DEPARTMENT_MANAGER, SpecialistType.IT_SPECIALIST],
-                    "performance": [SpecialistType.IT_SPECIALIST, SpecialistType.SYSTEM_ADMIN]
-                },
-                "quality_failure": {
-                    "validation_failure": [SpecialistType.HR_MANAGER, SpecialistType.COMPLIANCE_OFFICER],
-                    "completeness_issue": [SpecialistType.HR_MANAGER],
-                    "compliance": [SpecialistType.COMPLIANCE_OFFICER, SpecialistType.LEGAL_COUNSEL]
-                },
-                "security_issue": {
-                    "authentication_error": [SpecialistType.SECURITY_ANALYST, SpecialistType.IT_SPECIALIST],
-                    "data_breach": [SpecialistType.CISO, SpecialistType.SECURITY_ANALYST],
-                    "unauthorized_access": [SpecialistType.SECURITY_ANALYST, SpecialistType.CISO]
-                },
-                "system_error": {
-                    "connectivity_error": [SpecialistType.SYSTEM_ADMIN, SpecialistType.IT_SPECIALIST],
-                    "configuration_error": [SpecialistType.IT_SPECIALIST, SpecialistType.SYSTEM_ADMIN]
-                },
-                "business_rule_violation": {
-                    "compliance": [SpecialistType.COMPLIANCE_OFFICER, SpecialistType.HR_MANAGER],
-                    "policy": [SpecialistType.HR_MANAGER, SpecialistType.LEGAL_COUNSEL]
+            # Determinar tipo de especialista requerido
+            required_specialist_type = self._determine_specialist_type(error_category)
+            
+            # Filtrar especialistas disponibles
+            candidate_specialists = self._filter_specialists(
+                available_specialists, required_specialist_type, handoff_priority
+            )
+            
+            # Ranking de especialistas
+            ranked_specialists = self._rank_specialists(
+                candidate_specialists, error_category, error_severity
+            )
+            
+            if not ranked_specialists:
+                return {
+                    "success": False,
+                    "error": "No suitable specialists available",
+                    "fallback_required": True
                 }
-            }
             
-            # Extraer información del error
-            error_category = error_classification.get("error_category", "system_error")
-            error_type = error_classification.get("error_type", "unknown")
-            severity = error_classification.get("severity_level", "medium")
+            # Seleccionar especialista principal y backups
+            primary_specialist = ranked_specialists[0]
+            backup_specialists = ranked_specialists[1:3] if len(ranked_specialists) > 1 else []
             
-            # Determinar especialistas apropiados
-            specialists = []
-            if error_category in routing_matrix:
-                if error_type in routing_matrix[error_category]:
-                    specialists = routing_matrix[error_category][error_type]
-                else:
-                    # Fallback: usar el primer tipo disponible para la categoría
-                    specialists = list(routing_matrix[error_category].values())[0]
+            # Crear asignación
+            assignment = self._create_specialist_assignment(
+                handoff_request, primary_specialist, backup_specialists
+            )
             
-            # Fallback si no se encuentran especialistas
-            if not specialists:
-                if severity in ["emergency", "critical"]:
-                    specialists = [SpecialistType.SYSTEM_ADMIN, SpecialistType.DEPARTMENT_MANAGER]
-                else:
-                    specialists = [SpecialistType.IT_SPECIALIST]
-            
-            # Determinar departamento principal
-            department_mapping = {
-                SpecialistType.IT_SPECIALIST: EscalationDepartment.IT_DEPARTMENT,
-                SpecialistType.SYSTEM_ADMIN: EscalationDepartment.IT_DEPARTMENT,
-                SpecialistType.HR_MANAGER: EscalationDepartment.HR_DEPARTMENT,
-                SpecialistType.LEGAL_COUNSEL: EscalationDepartment.LEGAL_DEPARTMENT,
-                SpecialistType.SECURITY_ANALYST: EscalationDepartment.SECURITY_DEPARTMENT,
-                SpecialistType.CISO: EscalationDepartment.SECURITY_DEPARTMENT,
-                SpecialistType.COMPLIANCE_OFFICER: EscalationDepartment.COMPLIANCE_DEPARTMENT,
-                SpecialistType.DEPARTMENT_MANAGER: EscalationDepartment.MANAGEMENT,
-                SpecialistType.EXECUTIVE: EscalationDepartment.EXECUTIVE_OFFICE
-            }
-            
-            primary_department = department_mapping.get(specialists[0], EscalationDepartment.IT_DEPARTMENT)
-            
-            # Calcular SLA deadline
-            sla_minutes = self._get_sla_minutes(escalation_level)
-            sla_deadline = datetime.utcnow() + timedelta(minutes=sla_minutes)
-            
-            # Crear asignaciones de especialistas
-            assignments = []
-            specialist_directory = self._get_specialist_directory()
-            
-            for i, specialist_type in enumerate(specialists[:2]):  # Máximo 2 especialistas
-                specialist_info = self._get_available_specialist(specialist_type, specialist_directory)
-                
-                assignment = SpecialistAssignment(
-                    specialist_type=specialist_type,
-                    department=department_mapping.get(specialist_type, EscalationDepartment.IT_DEPARTMENT),
-                    specialist_name=specialist_info["name"],
-                    specialist_contact=specialist_info["contact"],
-                    backup_specialist=specialist_info.get("backup"),
-                    estimated_response_time=sla_minutes,
-                    sla_deadline=sla_deadline,
-                    assignment_reason=f"Primary specialist for {error_category} - {error_type}"
-                )
-                assignments.append(assignment)
+            # Determinar escalation chain
+            escalation_chain = self._build_escalation_chain(
+                primary_specialist, error_category, handoff_priority
+            )
             
             return {
                 "success": True,
-                "employee_id": employee_id,
-                "session_id": session_id,
-                "routing_result": {
-                    "primary_department": primary_department.value,
-                    "specialist_assignments": [assignment.dict() for assignment in assignments],
-                    "escalation_level": escalation_level,
-                    "sla_deadline": sla_deadline.isoformat(),
-                    "routing_rationale": f"Error category '{error_category}' with type '{error_type}' routed to {primary_department.value}",
-                    "estimated_response_minutes": sla_minutes
-                },
-                "routing_metadata": {
-                    "error_category": error_category,
-                    "error_type": error_type,
-                    "severity": severity,
-                    "specialists_available": len(assignments),
-                    "routing_timestamp": datetime.utcnow().isoformat()
-                }
+                "specialist_assignment": assignment,
+                "escalation_chain": escalation_chain,
+                "assignment_confidence": self._calculate_assignment_confidence(
+                    primary_specialist, error_category
+                ),
+                "backup_specialists": backup_specialists,
+                "routing_rationale": self._generate_routing_rationale(
+                    primary_specialist, error_category, error_severity
+                )
             }
             
         except Exception as e:
             return {
                 "success": False,
                 "error": f"Error in escalation routing: {str(e)}",
-                "session_id": session_id,
-                "routing_result": None
+                "fallback_required": True
             }
-    
-    def _get_sla_minutes(self, escalation_level: str) -> int:
-        """Obtener minutos SLA según nivel de escalación"""
-        sla_mapping = {
-            "emergency": 5,
-            "critical": 15,
-            "high": 60,
-            "medium": 240,  # 4 hours
-            "low": 1440     # 24 hours
+
+    def _get_default_specialists(self) -> List[Dict[str, Any]]:
+        """Obtener lista de especialistas por defecto"""
+        return [
+            {
+                "specialist_id": "it_001",
+                "name": "Carlos Méndez",
+                "specialist_type": SpecialistType.IT_SPECIALIST.value,
+                "department": "IT",
+                "is_available": True,
+                "current_workload": 2,
+                "max_concurrent_cases": 5,
+                "expertise_areas": ["agent_failures", "timeouts", "system_errors"],
+                "handling_categories": ["agent_failure", "system_error", "integration_error"],
+                "email": "carlos.mendez@company.com",
+                "slack_id": "carlos.mendez",
+                "average_resolution_time_hours": 4.0,
+                "success_rate": 0.92
+            },
+            {
+                "specialist_id": "hr_001", 
+                "name": "María Rodríguez",
+                "specialist_type": SpecialistType.HR_MANAGER.value,
+                "department": "HR",
+                "is_available": True,
+                "current_workload": 1,
+                "max_concurrent_cases": 4,
+                "expertise_areas": ["compliance", "data_validation", "quality_issues"],
+                "handling_categories": ["quality_failure", "data_validation", "business_rule_violation"],
+                "email": "maria.rodriguez@company.com",
+                "teams_id": "maria.rodriguez",
+                "average_resolution_time_hours": 6.0,
+                "success_rate": 0.95
+            },
+            {
+                "specialist_id": "sec_001",
+                "name": "Diego Vargas", 
+                "specialist_type": SpecialistType.SECURITY_SPECIALIST.value,
+                "department": "Security",
+                "is_available": True,
+                "current_workload": 0,
+                "max_concurrent_cases": 3,
+                "expertise_areas": ["security_issues", "authentication", "compliance"],
+                "handling_categories": ["security_issue", "authentication_error"],
+                "email": "diego.vargas@company.com",
+                "phone": "+506-8888-1234",
+                "average_resolution_time_hours": 2.0,
+                "success_rate": 0.98
+            },
+            {
+                "specialist_id": "legal_001",
+                "name": "Ana Jiménez",
+                "specialist_type": SpecialistType.LEGAL_SPECIALIST.value,
+                "department": "Legal",
+                "is_available": True,
+                "current_workload": 1,
+                "max_concurrent_cases": 3,
+                "expertise_areas": ["contract_issues", "compliance", "business_rules"],
+                "handling_categories": ["business_rule_violation", "quality_failure"],
+                "email": "ana.jimenez@company.com",
+                "average_resolution_time_hours": 12.0,
+                "success_rate": 0.96
+            }
+        ]
+
+    def _determine_specialist_type(self, error_category: str) -> SpecialistType:
+        """Determinar tipo de especialista basado en categoría de error"""
+        category_mapping = {
+            "agent_failure": SpecialistType.IT_SPECIALIST,
+            "system_error": SpecialistType.IT_SPECIALIST,
+            "integration_error": SpecialistType.IT_SPECIALIST,
+            "sla_breach": SpecialistType.IT_SPECIALIST,
+            "quality_failure": SpecialistType.HR_MANAGER,
+            "data_validation": SpecialistType.HR_MANAGER,
+            "business_rule_violation": SpecialistType.LEGAL_SPECIALIST,
+            "security_issue": SpecialistType.SECURITY_SPECIALIST
         }
-        return sla_mapping.get(escalation_level, 240)
-    
-    def _get_specialist_directory(self) -> Dict[str, List[Dict[str, str]]]:
-        """Obtener directorio de especialistas (simulado)"""
+        return category_mapping.get(error_category, SpecialistType.IT_SPECIALIST)
+
+    def _filter_specialists(self, specialists: List[Dict], 
+                          required_type: SpecialistType,
+                          priority: str) -> List[Dict]:
+        """Filtrar especialistas disponibles"""
+        filtered = []
+        for specialist in specialists:
+            # Check availability
+            if not specialist.get("is_available", False):
+                continue
+                
+            # Check workload capacity
+            current_load = specialist.get("current_workload", 0)
+            max_load = specialist.get("max_concurrent_cases", 5)
+            if current_load >= max_load:
+                continue
+                
+            # Check specialist type match
+            if specialist.get("specialist_type") == required_type.value:
+                filtered.append(specialist)
+            
+            # For high priority, also include generalists
+            elif priority in ["emergency", "critical"]:
+                if specialist.get("specialist_type") in [
+                    SpecialistType.SYSTEM_ADMIN.value,
+                    SpecialistType.IT_SPECIALIST.value
+                ]:
+                    filtered.append(specialist)
+        
+        return filtered
+
+    def _rank_specialists(self, specialists: List[Dict],
+                         error_category: str,
+                         error_severity: str) -> List[Dict]:
+        """Ranking de especialistas por idoneidad"""
+        scored_specialists = []
+        
+        for specialist in specialists:
+            score = self._calculate_specialist_score(
+                specialist, error_category, error_severity
+            )
+            scored_specialists.append((specialist, score))
+        
+        # Sort by score (higher is better)
+        scored_specialists.sort(key=lambda x: x[1], reverse=True)
+        return [specialist for specialist, score in scored_specialists]
+
+    def _calculate_specialist_score(self, specialist: Dict,
+                                   error_category: str,
+                                   error_severity: str) -> float:
+        """Calcular score de idoneidad del especialista"""
+        score = 0.0
+        
+        # Expertise match (40%)
+        expertise_areas = specialist.get("expertise_areas", [])
+        if any(area in error_category for area in expertise_areas):
+            score += 0.4
+        
+        # Category handling (30%)  
+        handling_categories = specialist.get("handling_categories", [])
+        if error_category in handling_categories:
+            score += 0.3
+            
+        # Performance metrics (20%)
+        success_rate = specialist.get("success_rate", 0.5)
+        score += 0.2 * success_rate
+        
+        # Availability/workload (10%)
+        current_load = specialist.get("current_workload", 0)
+        max_load = specialist.get("max_concurrent_cases", 5)
+        availability_factor = 1 - (current_load / max_load)
+        score += 0.1 * availability_factor
+        
+        return score
+
+    def _create_specialist_assignment(self, handoff_request: Dict,
+                                    primary_specialist: Dict,
+                                    backup_specialists: List[Dict]) -> Dict[str, Any]:
+        """Crear asignación de especialista"""
+        handoff_id = handoff_request.get("handoff_id", "unknown")
+        
+        # Convert to SpecialistProfile
+        specialist_profile = {
+            "specialist_id": primary_specialist.get("specialist_id"),
+            "name": primary_specialist.get("name"),
+            "specialist_type": primary_specialist.get("specialist_type"),
+            "department": primary_specialist.get("department"),
+            "is_available": primary_specialist.get("is_available", True),
+            "current_workload": primary_specialist.get("current_workload", 0),
+            "email": primary_specialist.get("email"),
+            "slack_id": primary_specialist.get("slack_id"),
+            "success_rate": primary_specialist.get("success_rate", 0.9)
+        }
+        
+        # Calculate expected resolution time
+        avg_resolution_hours = primary_specialist.get("average_resolution_time_hours", 8.0)
+        expected_resolution = datetime.utcnow() + timedelta(hours=avg_resolution_hours)
+        
         return {
-            "it_specialist": [
-                {"name": "Carlos IT Manager", "contact": "carlos.it@empresa.com", "backup": "ana.systems@empresa.com"},
-                {"name": "Ana Systems Admin", "contact": "ana.systems@empresa.com", "backup": "carlos.it@empresa.com"}
-            ],
-            "hr_manager": [
-                {"name": "María HR Director", "contact": "maria.hr@empresa.com", "backup": "luis.hr@empresa.com"},
-                {"name": "Luis HR Manager", "contact": "luis.hr@empresa.com", "backup": "maria.hr@empresa.com"}
-            ],
-            "legal_counsel": [
-                {"name": "Dr. Roberto Legal", "contact": "roberto.legal@empresa.com", "backup": "sofia.compliance@empresa.com"}
-            ],
-            "security_analyst": [
-                {"name": "Sofia Security", "contact": "sofia.security@empresa.com", "backup": "ricardo.ciso@empresa.com"}
-            ],
-            "ciso": [
-                {"name": "Ricardo CISO", "contact": "ricardo.ciso@empresa.com", "backup": "sofia.security@empresa.com"}
-            ],
-            "compliance_officer": [
-                {"name": "Patricia Compliance", "contact": "patricia.compliance@empresa.com", "backup": "roberto.legal@empresa.com"}
-            ],
-            "department_manager": [
-                {"name": "Director General", "contact": "director@empresa.com", "backup": "subdirector@empresa.com"}
-            ],
-            "system_admin": [
-                {"name": "Ana Systems Admin", "contact": "ana.systems@empresa.com", "backup": "carlos.it@empresa.com"}
-            ],
-            "executive": [
-                {"name": "CEO Ejecutivo", "contact": "ceo@empresa.com", "backup": "cto@empresa.com"}
-            ]
+            "handoff_id": handoff_id,
+            "assigned_specialist": specialist_profile,
+            "assignment_method": "automatic",
+            "assignment_reason": f"Best match for {handoff_request.get('error_category')} category",
+            "expected_resolution_time": expected_resolution.isoformat(),
+            "backup_specialists": backup_specialists,
+            "assigned_at": datetime.utcnow().isoformat()
         }
-    
-    def _get_available_specialist(self, specialist_type: SpecialistType, directory: Dict) -> Dict[str, str]:
-        """Obtener especialista disponible"""
-        specialists = directory.get(specialist_type.value, [])
-        if specialists:
-            # Simular selección del primer disponible
-            return specialists[0]
-        else:
-            # Fallback genérico
-            return {
-                "name": f"Default {specialist_type.value.replace('_', ' ').title()}",
-                "contact": f"{specialist_type.value}@empresa.com",
-                "backup": "admin@empresa.com"
-            }
+
+    def _build_escalation_chain(self, primary_specialist: Dict,
+                               error_category: str,
+                               priority: str) -> List[str]:
+        """Construir cadena de escalación"""
+        escalation_chain = [primary_specialist.get("specialist_id")]
+        
+        # Level 2: Department lead
+        department = primary_specialist.get("department", "IT")
+        escalation_chain.append(f"{department.lower()}_manager")
+        
+        # Level 3: Senior management for critical issues
+        if priority in ["critical", "emergency"]:
+            if error_category in ["security_issue", "system_error"]:
+                escalation_chain.append("ciso_director")
+            else:
+                escalation_chain.append("operations_director")
+        
+        # Level 4: Executive level for emergency
+        if priority == "emergency":
+            escalation_chain.append("cto_executive")
+        
+        return escalation_chain
+
+    def _calculate_assignment_confidence(self, specialist: Dict,
+                                       error_category: str) -> float:
+        """Calcular confianza en la asignación"""
+        confidence = 0.5  # Base confidence
+        
+        # Increase confidence based on expertise match
+        expertise_areas = specialist.get("expertise_areas", [])
+        if any(area in error_category for area in expertise_areas):
+            confidence += 0.3
+            
+        # Increase based on success rate
+        success_rate = specialist.get("success_rate", 0.5)
+        confidence += 0.2 * success_rate
+        
+        return min(1.0, confidence)
+
+    def _generate_routing_rationale(self, specialist: Dict,
+                                  error_category: str,
+                                  error_severity: str) -> str:
+        """Generar justificación del routing"""
+        name = specialist.get("name", "Unknown")
+        dept = specialist.get("department", "Unknown")
+        success_rate = specialist.get("success_rate", 0.0)
+        
+        return (f"Assigned to {name} from {dept} department based on expertise in "
+               f"{error_category} issues. Specialist has {success_rate:.1%} success rate "
+               f"and appropriate availability for {error_severity} severity level.")
 
 class ContextPackagerTool(BaseTool):
     """Herramienta para empaquetar contexto completo"""
-    name: str = "context_packager_tool"
-    description: str = "Empaqueta contexto completo del empleado y error para handoff"
+    name: str = "context_packager_tool" 
+    description: str = "Empaqueta contexto completo del empleado, error y sistema para handoff"
 
-    def _run(self, session_id: str, error_classification: Dict[str, Any],
-             recovery_attempts: Dict[str, Any]) -> Dict[str, Any]:
-        """Crear paquete completo de contexto"""
+    def _run(self, handoff_request: Dict[str, Any],
+             system_data: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Empaquetar contexto para handoff"""
         try:
             from core.state_management.state_manager import state_manager
             
-            # Obtener contexto completo del empleado
-            employee_context = state_manager.get_employee_context(session_id)
-            if not employee_context:
-                return {
-                    "success": False,
-                    "error": "Employee context not found",
-                    "session_id": session_id
-                }
+            session_id = handoff_request.get("session_id")
+            employee_id = handoff_request.get("employee_id")
+            handoff_id = handoff_request.get("handoff_id")
             
-            employee_id = employee_context.employee_id
-            
-            # Crear timeline del proceso
-            process_timeline = []
-            for agent_id, agent_state in employee_context.agent_states.items():
-                process_timeline.append({
-                    "agent_id": agent_id,
-                    "status": agent_state.status.value if hasattr(agent_state.status, 'value') else str(agent_state.status),
-                    "last_updated": agent_state.last_updated.isoformat() if agent_state.last_updated else None,
-                    "progress": agent_state.progress,
-                    "errors": agent_state.errors
-                })
-            
-            # Resumen del error
-            error_summary = {
-                "classification_id": error_classification.get("classification_id", "unknown"),
-                "error_category": error_classification.get("error_category", "unknown"),
-                "error_type": error_classification.get("error_type", "unknown"),
-                "severity_level": error_classification.get("severity_level", "medium"),
-                "root_cause": error_classification.get("root_cause_analysis", {}).get("primary_cause", "unknown"),
-                "affected_agents": error_classification.get("affected_agents", []),
-                "pipeline_stage": error_classification.get("pipeline_stage", "unknown"),
-                "business_impact": error_classification.get("estimated_impact", {}).get("business_impact", "unknown")
-            }
-            
-            # Historia de recuperación
-            recovery_history = []
-            if isinstance(recovery_attempts, dict) and "recovery_attempts" in recovery_attempts:
-                for attempt in recovery_attempts["recovery_attempts"]:
-                    recovery_history.append({
-                        "attempt_id": attempt.get("attempt_id", "unknown"),
-                        "strategy": attempt.get("strategy", "unknown"),
-                        "result": attempt.get("result", "unknown"),
-                        "timestamp": attempt.get("timestamp", datetime.utcnow().isoformat())
-                    })
-            
-            # Estado actual de agentes
-            agent_states = {}
-            for agent_id, agent_state in employee_context.agent_states.items():
-                agent_states[agent_id] = {
-                    "status": agent_state.status.value if hasattr(agent_state.status, 'value') else str(agent_state.status),
-                    "current_task": agent_state.current_task,
-                    "progress": agent_state.progress,
-                    "last_updated": agent_state.last_updated.isoformat() if agent_state.last_updated else None,
-                    "errors": agent_state.errors,
-                    "data_keys": list(agent_state.data.keys()) if agent_state.data else []
-                }
-            
-            # Estado del pipeline
-            pipeline_status = {
-                "current_phase": employee_context.phase.value if hasattr(employee_context.phase, 'value') else str(employee_context.phase),
-                "started_at": employee_context.started_at.isoformat(),
-                "updated_at": employee_context.updated_at.isoformat(),
-                "priority": employee_context.priority,
-                "requires_manual_review": employee_context.requires_manual_review,
-                "raw_data_keys": list(employee_context.raw_data.keys()) if employee_context.raw_data else [],
-                "processed_data_keys": list(employee_context.processed_data.keys()) if employee_context.processed_data else []
-            }
-            
-            # Determinar impacto de negocio y urgencia
-            business_impact = self._assess_business_impact(error_classification, employee_context)
-            urgency_justification = self._create_urgency_justification(error_classification, recovery_attempts)
+            # Obtener contexto del empleado
+            employee_context = None
+            if session_id:
+                employee_context = state_manager.get_employee_context(session_id)
             
             # Crear paquete de contexto
-            context_package = ContextPackage(
-                session_id=session_id,
-                employee_id=employee_id,
-                employee_context=employee_context.dict(),
-                process_timeline=process_timeline,
-                error_summary=error_summary,
-                recovery_history=recovery_history,
-                agent_states=agent_states,
-                pipeline_status=pipeline_status,
-                business_impact=business_impact,
-                urgency_justification=urgency_justification,
-                escalation_path=[
-                    "Automatic Error Detection",
-                    "Error Classification",
-                    "Recovery Attempts", 
-                    "Human Handoff Initiated"
-                ],
-                expires_at=datetime.utcnow() + timedelta(hours=24)  # Contexto válido por 24 horas
+            context_package = {
+                "package_id": f"ctx_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                "handoff_id": handoff_id,
+                "created_at": datetime.utcnow().isoformat()
+            }
+            
+            # Employee context
+            if employee_context:
+                context_package["employee_data"] = {
+                    "employee_id": employee_context.employee_id,
+                    "session_id": employee_context.session_id,
+                    "phase": employee_context.phase.value if hasattr(employee_context.phase, 'value') else str(employee_context.phase),
+                    "started_at": employee_context.started_at.isoformat() if employee_context.started_at else None,
+                    "priority": employee_context.priority,
+                    "raw_data_summary": self._summarize_data(employee_context.raw_data),
+                    "processed_data_summary": self._summarize_data(employee_context.processed_data)
+                }
+                
+                # Employee journey
+                context_package["employee_journey"] = self._build_employee_journey(employee_context)
+                
+                # Current pipeline stage
+                context_package["current_pipeline_stage"] = employee_context.phase.value if hasattr(employee_context.phase, 'value') else str(employee_context.phase)
+                
+                # Agent states
+                context_package["agent_states"] = {
+                    agent_id: {
+                        "status": state.status.value if hasattr(state.status, 'value') else str(state.status),
+                        "last_updated": state.last_updated.isoformat() if state.last_updated else None,
+                        "error_count": len(state.errors) if state.errors else 0,
+                        "has_data": bool(state.data)
+                    }
+                    for agent_id, state in employee_context.agent_states.items()
+                }
+            else:
+                context_package.update({
+                    "employee_data": {"employee_id": employee_id, "context_unavailable": True},
+                    "employee_journey": [],
+                    "current_pipeline_stage": "unknown",
+                    "agent_states": {}
+                })
+            
+            # Error context
+            error_context = handoff_request.get("error_context", {})
+            context_package["error_timeline"] = self._build_error_timeline(error_context)
+            context_package["failed_operations"] = self._extract_failed_operations(error_context)
+            
+            # Recovery attempts
+            recovery_attempts = handoff_request.get("recovery_attempts", [])
+            context_package["recovery_attempts_log"] = self._process_recovery_attempts(recovery_attempts)
+            
+            # System context
+            system_overview = state_manager.get_system_overview()
+            context_package["system_state_snapshot"] = {
+                "active_sessions": system_overview.get("active_sessions", 0),
+                "registered_agents": system_overview.get("registered_agents", 0),
+                "agents_status": system_overview.get("agents_status", {}),
+                "last_updated": system_overview.get("last_updated")
+            }
+            
+            # Business context
+            context_package["business_impact_assessment"] = self._assess_business_impact(
+                handoff_request, employee_context
+            )
+            
+            # SLA status
+            context_package["sla_status"] = self._get_sla_status(handoff_request)
+            
+            # Documentation
+            context_package["relevant_documents"] = self._gather_relevant_documents(
+                employee_id, session_id
+            )
+            
+            # Logs extract
+            context_package["logs_extract"] = self._extract_relevant_logs(
+                session_id, employee_id
+            )
+            
+            # Suggested actions
+            context_package["suggested_actions"] = self._generate_suggested_actions(
+                handoff_request, error_context
+            )
+            
+            # Calculate package completeness
+            completeness_score = self._calculate_package_completeness(context_package)
+            context_package["package_completeness"] = completeness_score
+            
+            # Identify missing critical info
+            context_package["critical_info_missing"] = self._identify_missing_info(
+                context_package, completeness_score
             )
             
             return {
                 "success": True,
-                "employee_id": employee_id,
-                "session_id": session_id,
-                "context_package": context_package.dict(),
-                "package_metadata": {
-                    "package_id": context_package.package_id,
-                    "created_at": context_package.created_at.isoformat(),
-                    "expires_at": context_package.expires_at.isoformat() if context_package.expires_at else None,
-                    "context_completeness": self._calculate_context_completeness(context_package),
-                    "critical_data_preserved": True
-                }
+                "context_package": context_package,
+                "package_completeness": completeness_score,
+                "handoff_ready": completeness_score >= 0.7,
+                "critical_info_complete": len(context_package["critical_info_missing"]) == 0
             }
             
         except Exception as e:
             return {
                 "success": False,
                 "error": f"Error creating context package: {str(e)}",
-                "session_id": session_id,
-                "context_package": None
+                "context_package": None,
+                "package_completeness": 0.0
             }
-    
-    def _assess_business_impact(self, error_classification: Dict, employee_context) -> str:
-        """Evaluar impacto de negocio"""
-        severity = error_classification.get("severity_level", "medium")
-        error_category = error_classification.get("error_category", "unknown")
+
+    def _summarize_data(self, data_dict: Dict) -> Dict[str, Any]:
+        """Resumir datos para contexto"""
+        if not data_dict:
+            return {"empty": True}
         
-        # Determinar impacto basado en severidad y categoría
-        if severity == "emergency":
-            return "CRITICAL - Onboarding process completely blocked, immediate business impact"
-        elif severity == "critical":
-            return "HIGH - Significant delays expected, SLA breaches likely"
-        elif error_category == "security_issue":
-            return "HIGH - Security implications require immediate attention"
+        return {
+            "field_count": len(data_dict),
+            "has_personal_info": any(key in data_dict for key in ["name", "email", "id_card"]),
+            "has_employment_info": any(key in data_dict for key in ["position", "department", "salary"]),
+            "sample_fields": list(data_dict.keys())[:5]
+        }
+
+    def _build_employee_journey(self, employee_context) -> List[Dict[str, Any]]:
+        """Construir timeline del empleado"""
+        journey = []
+        
+        # Journey from agent states
+        for agent_id, agent_state in employee_context.agent_states.items():
+            journey.append({
+                "timestamp": agent_state.last_updated.isoformat() if agent_state.last_updated else None,
+                "agent": agent_id,
+                "status": agent_state.status.value if hasattr(agent_state.status, 'value') else str(agent_state.status),
+                "has_data": bool(agent_state.data),
+                "errors": len(agent_state.errors) if agent_state.errors else 0
+            })
+        
+        # Sort by timestamp
+        journey.sort(key=lambda x: x["timestamp"] or "")
+        return journey
+
+    def _build_error_timeline(self, error_context: Dict) -> List[Dict[str, Any]]:
+        """Construir timeline de errores"""
+        timeline = []
+        
+        # Extract error events from context
+        if "errors" in error_context:
+            for error in error_context["errors"]:
+                timeline.append({
+                    "timestamp": error.get("timestamp", datetime.utcnow().isoformat()),
+                    "event_type": "error_occurred",
+                    "error_type": error.get("error_type", "unknown"),
+                    "severity": error.get("severity", "medium"),
+                    "source": error.get("source", "unknown")
+                })
+        
+        return sorted(timeline, key=lambda x: x["timestamp"])
+
+    def _extract_failed_operations(self, error_context: Dict) -> List[Dict[str, Any]]:
+        """Extraer operaciones fallidas"""
+        failed_ops = []
+        
+        if "failed_operations" in error_context:
+            for op in error_context["failed_operations"]:
+                failed_ops.append({
+                    "operation_type": op.get("type", "unknown"),
+                    "agent_id": op.get("agent_id", "unknown"),
+                    "failure_reason": op.get("error", "unknown"),
+                    "timestamp": op.get("timestamp", datetime.utcnow().isoformat())
+                })
+        
+        return failed_ops
+
+    def _process_recovery_attempts(self, recovery_attempts: List) -> List[Dict[str, Any]]:
+        """Procesar intentos de recuperación"""
+        processed = []
+        
+        for attempt in recovery_attempts:
+            processed.append({
+                "recovery_id": attempt.get("recovery_id", "unknown"),
+                "strategy": attempt.get("strategy", "unknown"),
+                "status": attempt.get("status", "unknown"),
+                "actions_executed": attempt.get("actions", []),
+                "success": attempt.get("success", False),
+                "timestamp": attempt.get("timestamp", datetime.utcnow().isoformat())
+            })
+        
+        return processed
+
+    def _assess_business_impact(self, handoff_request: Dict, employee_context) -> Dict[str, Any]:
+        """Evaluar impacto en el negocio"""
+        impact = {
+            "severity": handoff_request.get("business_impact", "medium"),
+            "employee_waiting": True,
+            "onboarding_delayed": True,
+            "stakeholders_affected": []
+        }
+        
+        # Determine stakeholders based on employee data
+        if employee_context and employee_context.raw_data:
+            dept = employee_context.raw_data.get("department", "")
+            position = employee_context.raw_data.get("position", "")
+            
+            impact["stakeholders_affected"] = [
+                f"{dept}_team",
+                "hr_department",
+                "hiring_manager"
+            ]
+            
+            # High impact for senior positions
+            if "senior" in position.lower() or "manager" in position.lower():
+                impact["severity"] = "high"
+                impact["stakeholders_affected"].append("department_leadership")
+        
+        return impact
+
+    def _get_sla_status(self, handoff_request: Dict) -> Dict[str, Any]:
+        """Obtener estado de SLA"""
+        priority = handoff_request.get("handoff_priority", "medium")
+        created_at = handoff_request.get("created_at")
+        
+        # SLA targets by priority
+        sla_targets = {
+            "emergency": 5,    # minutes
+            "critical": 15,    # minutes
+            "high": 60,        # minutes  
+            "medium": 240,     # minutes (4 hours)
+            "low": 1440        # minutes (24 hours)
+        }
+        
+        target_minutes = sla_targets.get(priority, 240)
+        
+        if created_at:
+            try:
+                if isinstance(created_at, str):
+                    created_time = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                else:
+                    created_time = created_at
+                
+                elapsed_minutes = (datetime.utcnow() - created_time).total_seconds() / 60
+                remaining_minutes = max(0, target_minutes - elapsed_minutes)
+                
+                return {
+                    "target_response_minutes": target_minutes,
+                    "elapsed_minutes": round(elapsed_minutes, 1),
+                    "remaining_minutes": round(remaining_minutes, 1),
+                    "sla_breach": elapsed_minutes > target_minutes,
+                    "sla_at_risk": remaining_minutes < (target_minutes * 0.2)  # 20% remaining
+                }
+            except Exception:
+                pass
+        
+        return {
+            "target_response_minutes": target_minutes,
+            "elapsed_minutes": 0,
+            "remaining_minutes": target_minutes,
+            "sla_breach": False,
+            "sla_at_risk": False
+        }
+
+    def _gather_relevant_documents(self, employee_id: str, session_id: str) -> List[Dict[str, Any]]:
+        """Recopilar documentos relevantes"""
+        # Simulate document gathering
+        return [
+            {
+                "document_type": "error_report",
+                "title": f"Error Report - {employee_id}",
+                "location": f"/logs/errors/{session_id}.log",
+                "size_kb": 45,
+                "created_at": datetime.utcnow().isoformat()
+            },
+            {
+                "document_type": "employee_data",
+                "title": f"Employee Context - {employee_id}",
+                "location": f"/data/employees/{employee_id}.json",
+                "size_kb": 12,
+                "created_at": datetime.utcnow().isoformat()
+            }
+        ]
+
+    def _extract_relevant_logs(self, session_id: str, employee_id: str) -> List[str]:
+        """Extraer logs relevantes"""
+        return [
+            f"[ERROR] {datetime.utcnow().isoformat()} - Agent failure in session {session_id}",
+            f"[WARN] {datetime.utcnow().isoformat()} - SLA risk detected for employee {employee_id}",
+            f"[INFO] {datetime.utcnow().isoformat()} - Recovery attempt initiated"
+        ]
+
+    def _generate_suggested_actions(self, handoff_request: Dict, error_context: Dict) -> List[str]:
+        """Generar acciones sugeridas"""
+        actions = []
+        
+        error_category = handoff_request.get("error_category", "")
+        
+        if error_category == "agent_failure":
+            actions.extend([
+                "Check agent logs for specific error details",
+                "Restart affected agent if safe",
+                "Verify agent dependencies and connectivity"
+            ])
+        elif error_category == "quality_failure":
+            actions.extend([
+                "Review quality gate configuration", 
+                "Validate employee data completeness",
+                "Consider manual quality override if appropriate"
+            ])
         elif error_category == "sla_breach":
-            return "MEDIUM - SLA compliance at risk, customer satisfaction impact"
-        else:
-            return "LOW - Process delays expected but manageable"
-    
-    def _create_urgency_justification(self, error_classification: Dict, recovery_attempts: Dict) -> str:
-        """Crear justificación de urgencia"""
-        recovery_failures = recovery_attempts.get("total_attempts", 0) if isinstance(recovery_attempts, dict) else 0
-        severity = error_classification.get("severity_level", "medium")
+            actions.extend([
+                "Assess SLA extension options",
+                "Notify stakeholders of delays",
+                "Implement priority escalation"
+            ])
         
-        justifications = []
+        # Always include general actions
+        actions.extend([
+            "Review complete error timeline",
+            "Validate system state consistency",
+            "Consider employee communication needs"
+        ])
         
-        if recovery_failures >= 3:
-            justifications.append(f"Multiple recovery attempts failed ({recovery_failures})")
+        return actions
+
+    def _calculate_package_completeness(self, package: Dict) -> float:
+        """Calcular completitud del paquete"""
+        required_sections = [
+            "employee_data", "employee_journey", "current_pipeline_stage",
+            "error_timeline", "system_state_snapshot", "business_impact_assessment"
+        ]
         
-        if severity in ["emergency", "critical"]:
-            justifications.append(f"High severity error ({severity})")
+        complete_sections = 0
+        for section in required_sections:
+            if section in package and package[section]:
+                complete_sections += 1
         
-        error_category = error_classification.get("error_category")
-        if error_category == "security_issue":
-            justifications.append("Security issue requires immediate specialist attention")
+        return complete_sections / len(required_sections)
+
+    def _identify_missing_info(self, package: Dict, completeness: float) -> List[str]:
+        """Identificar información crítica faltante"""
+        missing = []
         
-        if not justifications:
-            justifications.append("Standard escalation procedure - automatic recovery unsuccessful")
+        if completeness < 0.8:
+            if not package.get("employee_data", {}).get("employee_id"):
+                missing.append("Employee identification missing")
+            
+            if not package.get("error_timeline"):
+                missing.append("Error timeline incomplete")
+                
+            if not package.get("system_state_snapshot"):
+                missing.append("System state snapshot missing")
         
-        return "; ".join(justifications)
-    
-    def _calculate_context_completeness(self, context_package: ContextPackage) -> float:
-        """Calcular completitud del contexto (0-100)"""
-        completeness_factors = []
-        
-        # Factor 1: Información del empleado (25%)
-        if context_package.employee_context:
-            completeness_factors.append(25.0)
-        
-        # Factor 2: Timeline del proceso (25%)
-        if context_package.process_timeline:
-            completeness_factors.append(25.0)
-        
-        # Factor 3: Información del error (25%)
-        if context_package.error_summary:
-            completeness_factors.append(25.0)
-        
-        # Factor 4: Estados de agentes (25%)
-        if context_package.agent_states:
-            completeness_factors.append(25.0)
-        
-        return sum(completeness_factors)
+        return missing
 
 class TicketManagerTool(BaseTool):
     """Herramienta para crear y gestionar tickets de escalación"""
     name: str = "ticket_manager_tool"
-    description: str = "Crea y gestiona tickets de escalación en sistemas externos"
+    description: str = "Crea y gestiona tickets de escalación en sistema de ticketing"
 
-    def _run(self, escalation_request: Dict[str, Any], 
-             specialist_assignments: List[Dict[str, Any]],
-             context_package: Dict[str, Any]) -> Dict[str, Any]:
-        """Crear tickets de escalación"""
+    def _run(self, handoff_request: Dict[str, Any],
+             specialist_assignment: Dict[str, Any] = None,
+             context_package: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Crear ticket de escalación"""
         try:
-            session_id = escalation_request.get("session_id")
-            employee_id = escalation_request.get("employee_id")
-            escalation_level = escalation_request.get("escalation_level", "medium")
+            handoff_id = handoff_request.get("handoff_id")
+            employee_id = handoff_request.get("employee_id")
+            session_id = handoff_request.get("session_id")
             
-            tickets_created = []
+            # Generate ticket
+            ticket = self._create_escalation_ticket(
+                handoff_request, specialist_assignment, context_package
+            )
             
-            # Crear ticket principal
-            primary_assignment = specialist_assignments[0] if specialist_assignments else None
+            # Submit to ticketing system (simulated)
+            submission_result = self._submit_to_ticketing_system(ticket)
             
-            if primary_assignment:
-                ticket = self._create_escalation_ticket(
-                    session_id=session_id,
-                    employee_id=employee_id,
-                    escalation_level=escalation_level,
-                    assignment=primary_assignment,
-                    context_package=context_package,
-                    ticket_type="primary"
-                )
-                tickets_created.append(ticket)
+            # Calculate SLA targets
+            sla_info = self._calculate_ticket_sla(handoff_request)
             
-            # Crear tickets adicionales para otros especialistas
-            for assignment in specialist_assignments[1:]:
-                ticket = self._create_escalation_ticket(
-                    session_id=session_id,
-                    employee_id=employee_id,
-                    escalation_level=escalation_level,
-                    assignment=assignment,
-                    context_package=context_package,
-                    ticket_type="collaborative"
-                )
-                tickets_created.append(ticket)
-            
-            # Simular integración con sistemas externos
-            external_refs = {}
-            for ticket in tickets_created:
-                # Simular creación en JIRA
-                jira_ticket_id = f"ON-{ticket['ticket_id'][-6:]}"
-                external_refs[ticket['ticket_id']] = {
-                    "jira_ticket": jira_ticket_id,
-                    "servicenow_incident": f"INC{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
-                    "dashboard_url": f"https://dashboard.empresa.com/tickets/{ticket['ticket_id']}"
-                }
+            # Generate ticket URL
+            ticket_url = f"https://tickets.company.com/ticket/{ticket['ticket_id']}"
             
             return {
                 "success": True,
-                "employee_id": employee_id,
-                "session_id": session_id,
-                "ticket_management_result": {
-                    "tickets_created": tickets_created,
-                    "total_tickets": len(tickets_created),
-                    "primary_ticket_id": tickets_created[0]['ticket_id'] if tickets_created else None,
-                    "external_references": external_refs,
-                    "escalation_tracking_active": True
-                },
-                "ticket_metadata": {
-                    "creation_timestamp": datetime.utcnow().isoformat(),
-                    "escalation_level": escalation_level,
-                    "specialists_assigned": len(specialist_assignments),
-                    "estimated_resolution_time": self._estimate_resolution_time(escalation_level),
-                    "sla_compliance_tracking": True
+                "escalation_ticket": ticket,
+                "ticket_url": ticket_url,
+                "ticket_submitted": submission_result["success"],
+                "sla_info": sla_info,
+                "tracking_info": {
+                    "ticket_id": ticket["ticket_id"],
+                    "assigned_to": ticket["assigned_to"],
+                    "priority": ticket["priority"],
+                    "due_date": ticket["due_date"]
                 }
             }
             
         except Exception as e:
             return {
                 "success": False,
-                "error": f"Error creating escalation tickets: {str(e)}",
-                "session_id": escalation_request.get("session_id"),
-                "ticket_management_result": None
+                "error": f"Error creating escalation ticket: {str(e)}",
+                "escalation_ticket": None
             }
-    
-    def _create_escalation_ticket(self, session_id: str, employee_id: str,
-                                 escalation_level: str, assignment: Dict[str, Any],
-                                 context_package: Dict[str, Any], ticket_type: str) -> Dict[str, Any]:
-        """Crear ticket individual de escalación"""
+
+    def _create_escalation_ticket(self, handoff_request: Dict,
+                                 specialist_assignment: Dict = None,
+                                 context_package: Dict = None) -> Dict[str, Any]:
+        """Crear ticket de escalación"""
+        handoff_id = handoff_request.get("handoff_id")
+        employee_id = handoff_request.get("employee_id")
+        error_category = handoff_request.get("error_category", "unknown")
+        error_severity = handoff_request.get("error_severity", "medium")
+        priority = handoff_request.get("handoff_priority", "medium")
         
-        # Extraer información del contexto
-        error_summary = context_package.get("error_summary", {})
-        error_category = error_summary.get("error_category", "unknown")
-        error_type = error_summary.get("error_type", "unknown")
-        
-        # Crear título y descripción
-        title = f"[{escalation_level.upper()}] Onboarding Error - {employee_id} - {error_category}"
-        
+        # Generate title and description
+        title = self._generate_ticket_title(employee_id, error_category, error_severity)
         description = self._generate_ticket_description(
-            employee_id=employee_id,
-            error_summary=error_summary,
-            context_package=context_package,
-            assignment=assignment
+            handoff_request, specialist_assignment, context_package
         )
         
-        # Calcular SLA deadline
-        sla_minutes = self._get_sla_minutes(escalation_level)
-        sla_deadline = datetime.utcnow() + timedelta(minutes=sla_minutes)
+        # Determine assignment
+        assigned_to = "unassigned"
+        assigned_team = "general_support"
         
-        # Crear especialista assignment object
-        specialist_assignment = SpecialistAssignment(
-            specialist_type=SpecialistType(assignment["specialist_type"]),
-            department=EscalationDepartment(assignment["department"]),
-            specialist_name=assignment["specialist_name"],
-            specialist_contact=assignment["specialist_contact"],
-            backup_specialist=assignment.get("backup_specialist"),
-            estimated_response_time=sla_minutes,
-            sla_deadline=sla_deadline,
-            assignment_reason=assignment["assignment_reason"]
-        )
+        if specialist_assignment:
+            specialist = specialist_assignment.get("assigned_specialist", {})
+            assigned_to = specialist.get("name", "unassigned")
+            assigned_team = specialist.get("department", "general_support")
         
-        # Crear ticket
-        ticket = EscalationTicket(
-            session_id=session_id,
-            employee_id=employee_id,
-            title=title,
-            description=description,
-            escalation_level=EscalationLevel(escalation_level),
-            category=error_category,
-            assigned_department=EscalationDepartment(assignment["department"]),
-            assigned_specialist=specialist_assignment,
-            sla_deadline=sla_deadline,
-            context_package_id=context_package.get("package_id", "unknown")
-        )
+        # Calculate due date
+        due_date = self._calculate_due_date(priority)
         
-        return ticket.dict()
-    
-    def _generate_ticket_description(self, employee_id: str, error_summary: Dict,
-                                   context_package: Dict, assignment: Dict) -> str:
-        """Generar descripción detallada del ticket"""
-        
-        template = f"""
-ESCALATION TICKET - ONBOARDING PROCESS FAILURE
-
-**EMPLOYEE INFORMATION:**
-- Employee ID: {employee_id}
-- Session ID: {context_package.get('session_id', 'N/A')}
-- Current Phase: {context_package.get('pipeline_status', {}).get('current_phase', 'Unknown')}
-
-**ERROR DETAILS:**
-- Category: {error_summary.get('error_category', 'Unknown')}
-- Type: {error_summary.get('error_type', 'Unknown')}
-- Severity: {error_summary.get('severity_level', 'Unknown')}
-- Root Cause: {error_summary.get('root_cause', 'Under investigation')}
-
-**BUSINESS IMPACT:**
-{context_package.get('business_impact', 'Impact assessment pending')}
-
-**RECOVERY ATTEMPTS:**
-{len(context_package.get('recovery_history', []))} recovery attempts made
-- All automatic recovery strategies have been exhausted
-- Manual intervention required
-
-**ASSIGNED SPECIALIST:**
-- Name: {assignment['specialist_name']}
-- Department: {assignment['department']}
-- Contact: {assignment['specialist_contact']}
-- Backup: {assignment.get('backup_specialist', 'N/A')}
-
-**CONTEXT PACKAGE:**
-- Package ID: {context_package.get('package_id', 'N/A')}
-- Completeness: {context_package.get('context_completeness', 0)}%
-- Expires: {context_package.get('expires_at', 'N/A')}
-
-**URGENCY JUSTIFICATION:**
-{context_package.get('urgency_justification', 'Standard escalation procedure')}
-
-**IMMEDIATE ACTIONS REQUIRED:**
-1. Review context package and error classification
-2. Assess current system state and affected components
-3. Determine appropriate recovery strategy
-4. Coordinate with other departments if necessary
-5. Update ticket with progress and resolution
-
-**ESCALATION PATH:**
-{' → '.join(context_package.get('escalation_path', []))}
-
-This ticket requires immediate attention according to escalation level: {error_summary.get('severity_level', 'Unknown')}
-"""
-        return template.strip()
-    
-    def _get_sla_minutes(self, escalation_level: str) -> int:
-        """Obtener minutos SLA según nivel"""
-        sla_mapping = {
-            "emergency": 5,
-            "critical": 15,
-            "high": 60,
-            "medium": 240,
-            "low": 1440
+        ticket = {
+            "ticket_id": f"TKT-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "handoff_id": handoff_id,
+            "title": title,
+            "description": description,
+            "category": error_category,
+            "priority": priority,
+            "severity": error_severity,
+            "assigned_to": assigned_to,
+            "assigned_team": assigned_team,
+            "created_by": "human_handoff_agent",
+            "status": "open",
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
+            "due_date": due_date.isoformat(),
+            "context_package_id": context_package.get("package_id") if context_package else None,
+            "employee_id": employee_id,
+            "session_id": handoff_request.get("session_id"),
+            "comments": [],
+            "attachments": []
         }
-        return sla_mapping.get(escalation_level, 240)
-    
-    def _estimate_resolution_time(self, escalation_level: str) -> int:
-        """Estimar tiempo de resolución en minutos"""
-        resolution_estimates = {
-            "emergency": 30,     # 30 minutes
-            "critical": 120,     # 2 hours
-            "high": 480,         # 8 hours
-            "medium": 1440,      # 24 hours
-            "low": 2880          # 48 hours
+        
+        # Add initial comment with context
+        initial_comment = self._create_initial_comment(handoff_request, context_package)
+        ticket["comments"].append(initial_comment)
+        
+        return ticket
+
+    def _generate_ticket_title(self, employee_id: str, error_category: str, 
+                              error_severity: str) -> str:
+        """Generar título del ticket"""
+        severity_prefix = {
+            "emergency": "[EMERGENCY]",
+            "critical": "[CRITICAL]",
+            "high": "[HIGH]", 
+            "medium": "",
+            "low": "[LOW]"
         }
-        return resolution_estimates.get(escalation_level, 1440)
+        
+        prefix = severity_prefix.get(error_severity, "")
+        category_readable = error_category.replace("_", " ").title()
+        
+        return f"{prefix} {category_readable} - Employee {employee_id} Onboarding Issue".strip()
 
-class NotificationSystemTool(BaseTool):
-    """Herramienta para notificar stakeholders apropiados"""
-    name: str = "notification_system_tool"
-    description: str = "Envía notificaciones a stakeholders según canal y prioridad"
+    def _generate_ticket_description(self, handoff_request: Dict,
+                                   specialist_assignment: Dict = None,
+                                   context_package: Dict = None) -> str:
+        """Generar descripción del ticket"""
+        lines = [
+            "## Onboarding System Escalation",
+            f"**Employee ID:** {handoff_request.get('employee_id')}",
+            f"**Session ID:** {handoff_request.get('session_id')}",
+            f"**Error Category:** {handoff_request.get('error_category')}",
+            f"**Severity:** {handoff_request.get('error_severity')}",
+            f"**Priority:** {handoff_request.get('handoff_priority')}",
+            "",
+            "## Issue Summary",
+            "Automated onboarding pipeline has encountered an error that requires human intervention.",
+            ""
+        ]
+        
+        # Add error context
+        if "error_context" in handoff_request:
+            lines.extend([
+                "## Error Details",
+                f"```json",
+                json.dumps(handoff_request["error_context"], indent=2),
+                "```",
+                ""
+            ])
+        
+        # Add recovery attempts
+        if "recovery_attempts" in handoff_request:
+            lines.extend([
+                "## Recovery Attempts",
+                f"Previous recovery attempts: {len(handoff_request['recovery_attempts'])}",
+                ""
+            ])
+            
+        # Add specialist assignment info
+        if specialist_assignment:
+            specialist = specialist_assignment.get("assigned_specialist", {})
+            lines.extend([
+                "## Assignment Information",
+                f"**Assigned Specialist:** {specialist.get('name', 'Unknown')}",
+                f"**Department:** {specialist.get('department', 'Unknown')}",
+                f"**Assignment Reason:** {specialist_assignment.get('assignment_reason', 'Automated routing')}",
+                ""
+            ])
+        
+        # Add context package reference
+        if context_package:
+            lines.extend([
+                "## Context Package",
+                f"**Package ID:** {context_package.get('package_id')}",
+                f"**Completeness:** {context_package.get('package_completeness', 0):.1%}",
+                f"**Created:** {context_package.get('created_at')}",
+                ""
+            ])
+        
+        lines.extend([
+            "## Next Steps",
+            "1. Review complete context package",
+            "2. Analyze error timeline and recovery attempts", 
+            "3. Determine appropriate resolution strategy",
+            "4. Execute resolution and update ticket status",
+            "",
+            "## SLA Requirements",
+            f"This ticket must be addressed according to {handoff_request.get('handoff_priority', 'medium')} priority SLA requirements."
+        ])
+        
+        return "\n".join(lines)
 
-    def _run(self, tickets_created: List[Dict[str, Any]], 
-             specialist_assignments: List[Dict[str, Any]],
-             escalation_level: str) -> Dict[str, Any]:
-        """Enviar notificaciones a stakeholders"""
+    def _calculate_due_date(self, priority: str) -> datetime:
+        """Calcular fecha límite basada en prioridad"""
+        priority_hours = {
+            "emergency": 0.08,  # 5 minutes 
+            "critical": 0.25,   # 15 minutes
+            "high": 1.0,        # 1 hour
+            "medium": 4.0,      # 4 hours
+            "low": 24.0         # 24 hours
+        }
+        
+        hours = priority_hours.get(priority, 4.0)
+        return datetime.utcnow() + timedelta(hours=hours)
+
+    def _create_initial_comment(self, handoff_request: Dict, 
+                               context_package: Dict = None) -> Dict[str, Any]:
+        """Crear comentario inicial del ticket"""
+        return {
+            "comment_id": f"comment_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "author": "human_handoff_agent",
+            "timestamp": datetime.utcnow().isoformat(),
+            "comment_type": "system_generated",
+            "content": f"Ticket created automatically by Human Handoff Agent. "
+                      f"Handoff ID: {handoff_request.get('handoff_id')}. "
+                      f"Context package available with {context_package.get('package_completeness', 0):.1%} completeness." 
+                      if context_package else "Context package not available."
+        }
+
+    def _submit_to_ticketing_system(self, ticket: Dict) -> Dict[str, Any]:
+        """Enviar ticket al sistema de ticketing (simulado)"""
+        # Simulate API call to ticketing system
         try:
-            notifications_sent = []
-            notification_failures = []
-            
-            # Determinar canales según escalación
-            channels = self._get_notification_channels(escalation_level)
-            
-            # Crear notificaciones para cada especialista
-            for assignment in specialist_assignments:
-                for channel in channels:
-                    notification = self._create_notification(
-                        assignment=assignment,
-                        tickets=tickets_created,
-                        channel=channel,
-                        escalation_level=escalation_level
-                    )
-                    
-                    # Simular envío de notificación
-                    send_result = self._send_notification(notification, channel)
-                    
-                    if send_result["success"]:
-                        notification["sent_at"] = datetime.utcnow()
-                        notification["delivered_at"] = datetime.utcnow()
-                        notifications_sent.append(notification)
-                    else:
-                        notification_failures.append({
-                            "notification": notification,
-                            "error": send_result["error"],
-                            "channel": channel
-                        })
-            
-            # Notificaciones adicionales para escalación alta
-            if escalation_level in ["emergency", "critical"]:
-                management_notifications = self._create_management_notifications(
-                    tickets_created, escalation_level
-                )
-                
-                for notification in management_notifications:
-                    send_result = self._send_notification(notification, NotificationChannel.EMAIL)
-                    if send_result["success"]:
-                        notification["sent_at"] = datetime.utcnow()
-                        notifications_sent.append(notification)
-            
-            # Crear notificación de dashboard
-            dashboard_notification = self._create_dashboard_notification(
-                tickets_created, escalation_level
-            )
-            if dashboard_notification:
-                notifications_sent.append(dashboard_notification)
+            # Simulate network delay
+            import time
+            time.sleep(0.1)
             
             return {
                 "success": True,
-                "notification_result": {
-                    "notifications_sent": notifications_sent,
-                    "total_notifications": len(notifications_sent),
-                    "notification_failures": notification_failures,
-                    "channels_used": list(set([n.get("channel") for n in notifications_sent])),
-                    "specialists_notified": len(specialist_assignments),
-                    "escalation_level": escalation_level
-                },
-                "notification_metadata": {
-                    "notification_timestamp": datetime.utcnow().isoformat(),
-                    "priority_notifications": escalation_level in ["emergency", "critical"],
-                    "management_notified": escalation_level in ["emergency", "critical"],
-                    "dashboard_updated": True,
-                    "retry_scheduled": len(notification_failures) > 0
-                }
+                "ticket_id": ticket["ticket_id"],
+                "external_id": f"EXT-{ticket['ticket_id']}",
+                "submission_timestamp": datetime.utcnow().isoformat(),
+                "assigned_queue": ticket["assigned_team"]
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "ticket_id": ticket["ticket_id"]
+            }
+
+    def _calculate_ticket_sla(self, handoff_request: Dict) -> Dict[str, Any]:
+        """Calcular información de SLA del ticket"""
+        priority = handoff_request.get("handoff_priority", "medium")
+        
+        sla_targets = {
+            "emergency": {"response_minutes": 5, "resolution_hours": 1},
+            "critical": {"response_minutes": 15, "resolution_hours": 4}, 
+            "high": {"response_minutes": 60, "resolution_hours": 8},
+            "medium": {"response_minutes": 240, "resolution_hours": 24},
+            "low": {"response_minutes": 1440, "resolution_hours": 72}
+        }
+        
+        target = sla_targets.get(priority, sla_targets["medium"])
+        
+        return {
+            "priority": priority,
+            "response_target_minutes": target["response_minutes"],
+            "resolution_target_hours": target["resolution_hours"],
+            "created_at": datetime.utcnow().isoformat(),
+            "response_due": (datetime.utcnow() + timedelta(minutes=target["response_minutes"])).isoformat(),
+            "resolution_due": (datetime.utcnow() + timedelta(hours=target["resolution_hours"])).isoformat()
+        }
+
+class NotificationSystemTool(BaseTool):
+    """Herramienta para enviar notificaciones a stakeholders"""
+    name: str = "notification_system_tool"
+    description: str = "Envía notificaciones a stakeholders apropiados via múltiples canales"
+
+    def _run(self, handoff_request: Dict[str, Any],
+             specialist_assignment: Dict[str, Any] = None,
+             escalation_ticket: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Enviar notificaciones"""
+        try:
+            notifications_sent = []
+            
+            # Determine recipients
+            recipients = self._determine_notification_recipients(
+                handoff_request, specialist_assignment
+            )
+            
+            # Send specialist assignment notification
+            if specialist_assignment and recipients.get("specialist"):
+                specialist_notification = self._send_specialist_notification(
+                    handoff_request, specialist_assignment, escalation_ticket
+                )
+                notifications_sent.append(specialist_notification)
+            
+            # Send stakeholder notifications
+            if recipients.get("stakeholders"):
+                for stakeholder in recipients["stakeholders"]:
+                    stakeholder_notification = self._send_stakeholder_notification(
+                        handoff_request, stakeholder, escalation_ticket
+                    )
+                    notifications_sent.append(stakeholder_notification)
+            
+            # Send management notification for high priority
+            priority = handoff_request.get("handoff_priority", "medium")
+            if priority in ["critical", "emergency"] and recipients.get("management"):
+                management_notification = self._send_management_notification(
+                    handoff_request, escalation_ticket
+                )
+                notifications_sent.append(management_notification)
+            
+            # Count successful notifications
+            successful_notifications = len([n for n in notifications_sent if n.get("status") == "sent"])
+            failed_notifications = len([n for n in notifications_sent if n.get("status") == "failed"])
+            
+            return {
+                "success": True,
+                "notifications_sent": notifications_sent,
+                "successful_notifications": successful_notifications,
+                "failed_notifications": failed_notifications,
+                "total_notifications": len(notifications_sent),
+                "notification_summary": self._create_notification_summary(notifications_sent)
             }
             
         except Exception as e:
             return {
                 "success": False,
                 "error": f"Error sending notifications: {str(e)}",
-                "notification_result": None
+                "notifications_sent": [],
+                "successful_notifications": 0,
+                "failed_notifications": 0
             }
-    
-    def _get_notification_channels(self, escalation_level: str) -> List[NotificationChannel]:
-        """Determinar canales de notificación según nivel"""
-        channel_mapping = {
-            "emergency": [NotificationChannel.PHONE, NotificationChannel.SMS, 
-                         NotificationChannel.SLACK, NotificationChannel.EMAIL],
-            "critical": [NotificationChannel.SLACK, NotificationChannel.EMAIL, 
-                        NotificationChannel.SMS],
-            "high": [NotificationChannel.SLACK, NotificationChannel.EMAIL],
-            "medium": [NotificationChannel.EMAIL, NotificationChannel.SLACK],
-            "low": [NotificationChannel.EMAIL]
+
+    def _determine_notification_recipients(self, handoff_request: Dict,
+                                         specialist_assignment: Dict = None) -> Dict[str, List]:
+        """Determinar destinatarios de notificaciones"""
+        recipients = {
+            "specialist": None,
+            "stakeholders": [],
+            "management": []
         }
-        return channel_mapping.get(escalation_level, [NotificationChannel.EMAIL])
-    
-    def _create_notification(self, assignment: Dict, tickets: List[Dict], 
-                           channel: NotificationChannel, escalation_level: str) -> Dict[str, Any]:
-        """Crear notificación individual"""
         
-        primary_ticket = tickets[0] if tickets else {}
+        # Primary specialist
+        if specialist_assignment:
+            recipients["specialist"] = specialist_assignment.get("assigned_specialist")
         
-        # Templates por canal
-        if channel == NotificationChannel.SLACK:
-            subject = f"🚨 ESCALATION: {escalation_level.upper()} - {primary_ticket.get('employee_id', 'Unknown')}"
-            message = self._create_slack_message(assignment, primary_ticket, escalation_level)
-        elif channel == NotificationChannel.EMAIL:
-            subject = f"ESCALATION REQUIRED - {escalation_level.upper()} - Ticket {primary_ticket.get('ticket_id', 'Unknown')}"
-            message = self._create_email_message(assignment, primary_ticket, escalation_level)
-        elif channel == NotificationChannel.SMS:
-            subject = f"URGENT: Escalation {primary_ticket.get('ticket_id', 'Unknown')}"
-            message = f"Escalation assigned - {escalation_level.upper()} priority. Check dashboard immediately."
-        else:
-            subject = f"Escalation: {primary_ticket.get('ticket_id', 'Unknown')}"
-            message = f"New escalation assigned to {assignment['specialist_name']}"
+        # Stakeholders based on error category
+        error_category = handoff_request.get("error_category", "")
         
-        notification = NotificationEvent(
-            ticket_id=primary_ticket.get('ticket_id', 'unknown'),
-            session_id=primary_ticket.get('session_id', 'unknown'),
-            recipient=assignment['specialist_contact'],
-            channel=channel,
-            specialist_type=SpecialistType(assignment['specialist_type']),
-            subject=subject,
-            message=message,
-            priority_flag=escalation_level in ["emergency", "critical"],
-            template_used=f"{channel.value}_escalation_template"
+        if error_category in ["agent_failure", "system_error"]:
+            recipients["stakeholders"].extend([
+                {"type": "team", "id": "it_support", "channel": "slack"},
+                {"type": "individual", "id": "system_admin", "channel": "email"}
+            ])
+        
+        if error_category in ["quality_failure", "data_validation"]:
+            recipients["stakeholders"].extend([
+                {"type": "team", "id": "hr_team", "channel": "teams"},
+                {"type": "individual", "id": "quality_manager", "channel": "email"}
+            ])
+        
+        # Management for high priority
+        priority = handoff_request.get("handoff_priority", "medium")
+        if priority in ["critical", "emergency"]:
+            recipients["management"].extend([
+                {"type": "individual", "id": "operations_manager", "channel": "slack"},
+                {"type": "individual", "id": "hr_director", "channel": "email"}
+            ])
+        
+        return recipients
+
+    def _send_specialist_notification(self, handoff_request: Dict,
+                                    specialist_assignment: Dict,
+                                    escalation_ticket: Dict = None) -> Dict[str, Any]:
+        """Enviar notificación al especialista asignado"""
+        specialist = specialist_assignment.get("assigned_specialist", {})
+        
+        # Determine preferred channel
+        preferred_channel = self._get_specialist_preferred_channel(specialist)
+        
+        # Create notification
+        notification = {
+            "notification_id": f"notify_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "handoff_id": handoff_request.get("handoff_id"),
+            "notification_type": "specialist_assignment",
+            "channel": preferred_channel,
+            "recipient": specialist.get("name", "Unknown"),
+            "recipient_type": "specialist"
+        }
+        
+        # Generate message
+        subject, message = self._generate_specialist_message(
+            handoff_request, specialist, escalation_ticket
         )
         
-        return notification.dict()
-    
-    def _create_slack_message(self, assignment: Dict, ticket: Dict, escalation_level: str) -> str:
-        """Crear mensaje para Slack"""
-        emoji_map = {
-            "emergency": "🔥",
-            "critical": "🚨", 
-            "high": "⚠️",
-            "medium": "📋",
-            "low": "📝"
+        notification.update({
+            "subject": subject,
+            "message": message,
+            "priority": handoff_request.get("handoff_priority", "medium")
+        })
+        
+        # Simulate sending
+        delivery_result = self._simulate_notification_delivery(notification, specialist)
+        notification.update(delivery_result)
+        
+        return notification
+
+    def _send_stakeholder_notification(self, handoff_request: Dict,
+                                     stakeholder: Dict,
+                                     escalation_ticket: Dict = None) -> Dict[str, Any]:
+        """Enviar notificación a stakeholder"""
+        notification = {
+            "notification_id": f"notify_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "handoff_id": handoff_request.get("handoff_id"),
+            "notification_type": "stakeholder_alert",
+            "channel": stakeholder.get("channel", "email"),
+            "recipient": stakeholder.get("id", "unknown"),
+            "recipient_type": stakeholder.get("type", "individual")
         }
         
-        emoji = emoji_map.get(escalation_level, "📋")
+        # Generate message
+        subject, message = self._generate_stakeholder_message(
+            handoff_request, stakeholder, escalation_ticket
+        )
         
-        return f"""
-{emoji} **ONBOARDING ESCALATION ASSIGNED**
-
-**Priority:** {escalation_level.upper()}
-**Employee:** {ticket.get('employee_id', 'Unknown')}
-**Ticket:** {ticket.get('ticket_id', 'Unknown')}
-
-**Assigned to:** {assignment['specialist_name']} ({assignment['department']})
-**SLA Deadline:** {ticket.get('sla_deadline', 'Unknown')}
-
-**Error:** {ticket.get('category', 'Unknown')} - {ticket.get('title', 'Unknown')}
-
-**Actions:**
-• Review ticket details in dashboard
-• Check context package
-• Begin investigation immediately
-• Update ticket with progress
-
-**Dashboard:** https://dashboard.empresa.com/tickets/{ticket.get('ticket_id', 'unknown')}
-"""
-    
-    def _create_email_message(self, assignment: Dict, ticket: Dict, escalation_level: str) -> str:
-        """Crear mensaje para email"""
-        return f"""
-Dear {assignment['specialist_name']},
-
-An onboarding process escalation has been assigned to you with {escalation_level.upper()} priority.
-
-ESCALATION DETAILS:
-- Employee ID: {ticket.get('employee_id', 'Unknown')}
-- Ticket ID: {ticket.get('ticket_id', 'Unknown')}
-- Category: {ticket.get('category', 'Unknown')}
-- Department: {assignment['department']}
-- SLA Deadline: {ticket.get('sla_deadline', 'Unknown')}
-
-DESCRIPTION:
-{ticket.get('description', 'No description available')[:200]}...
-
-IMMEDIATE ACTIONS REQUIRED:
-1. Log into the escalation dashboard
-2. Review the complete context package
-3. Begin investigation and troubleshooting
-4. Update the ticket with your progress
-5. Coordinate with backup specialist if needed
-
-BACKUP SPECIALIST: {assignment.get('backup_specialist', 'Not assigned')}
-
-ACCESS DASHBOARD: https://dashboard.empresa.com/tickets/{ticket.get('ticket_id', 'unknown')}
-
-This escalation requires immediate attention. Please acknowledge receipt and begin work immediately.
-
-Best regards,
-Automated Onboarding System
-"""
-    
-    def _create_management_notifications(self, tickets: List[Dict], escalation_level: str) -> List[Dict]:
-        """Crear notificaciones para management"""
-        notifications = []
+        notification.update({
+            "subject": subject,
+            "message": message,
+            "priority": handoff_request.get("handoff_priority", "medium")
+        })
         
-        management_contacts = [
-            {"name": "IT Director", "email": "it.director@empresa.com"},
-            {"name": "HR Director", "email": "hr.director@empresa.com"},
-            {"name": "Operations Manager", "email": "operations@empresa.com"}
+        # Simulate sending
+        delivery_result = self._simulate_notification_delivery(notification, stakeholder)
+        notification.update(delivery_result)
+        
+        return notification
+
+    def _send_management_notification(self, handoff_request: Dict,
+                                    escalation_ticket: Dict = None) -> Dict[str, Any]:
+        """Enviar notificación a management"""
+        notification = {
+            "notification_id": f"notify_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "handoff_id": handoff_request.get("handoff_id"),
+            "notification_type": "management_escalation",
+            "channel": "slack",  # High priority via Slack
+            "recipient": "operations_manager",
+            "recipient_type": "management"
+        }
+        
+        # Generate message
+        subject, message = self._generate_management_message(
+            handoff_request, escalation_ticket
+        )
+        
+        notification.update({
+            "subject": subject,
+            "message": message,
+            "priority": handoff_request.get("handoff_priority", "critical"),
+            "requires_acknowledgment": True
+        })
+        
+        # Simulate sending
+        delivery_result = self._simulate_notification_delivery(notification, {"type": "management"})
+        notification.update(delivery_result)
+        
+        return notification
+
+    def _get_specialist_preferred_channel(self, specialist: Dict) -> str:
+        """Obtener canal preferido del especialista"""
+        if specialist.get("slack_id"):
+            return "slack"
+        elif specialist.get("teams_id"):
+            return "teams"
+        else:
+            return "email"
+
+    def _generate_specialist_message(self, handoff_request: Dict,
+                                   specialist: Dict,
+                                   escalation_ticket: Dict = None) -> tuple:
+        """Generar mensaje para especialista"""
+        employee_id = handoff_request.get("employee_id")
+        error_category = handoff_request.get("error_category", "unknown")
+        priority = handoff_request.get("handoff_priority", "medium")
+        
+        subject = f"[{priority.upper()}] Onboarding Issue Assignment - Employee {employee_id}"
+        
+        message_lines = [
+            f"Hi {specialist.get('name', 'there')},",
+            "",
+            f"You have been assigned a new onboarding escalation case:",
+            "",
+            f"**Employee ID:** {employee_id}",
+            f"**Issue Category:** {error_category.replace('_', ' ').title()}",
+            f"**Priority:** {priority.title()}",
+            f"**Session ID:** {handoff_request.get('session_id')}",
         ]
         
-        primary_ticket = tickets[0] if tickets else {}
+        if escalation_ticket:
+            message_lines.extend([
+                "",
+                f"**Ticket:** {escalation_ticket.get('ticket_id')}",
+                f"**Due Date:** {escalation_ticket.get('due_date')}",
+                f"**Ticket URL:** https://tickets.company.com/ticket/{escalation_ticket.get('ticket_id')}"
+            ])
         
-        for contact in management_contacts:
-            notification = NotificationEvent(
-                ticket_id=primary_ticket.get('ticket_id', 'unknown'),
-                session_id=primary_ticket.get('session_id', 'unknown'),
-                recipient=contact['email'],
-                channel=NotificationChannel.EMAIL,
-                specialist_type=SpecialistType.DEPARTMENT_MANAGER,
-                subject=f"MANAGEMENT ALERT - {escalation_level.upper()} Onboarding Escalation",
-                message=f"""
-Management Alert: High priority onboarding escalation
+        message_lines.extend([
+            "",
+            "**Assignment Reason:** Best match for this type of issue based on your expertise",
+            "",
+            "Please review the complete context package and ticket details to begin resolution.",
+            "",
+            "Thank you,",
+            "Onboarding System"
+        ])
+        
+        return subject, "\n".join(message_lines)
 
-Employee: {primary_ticket.get('employee_id', 'Unknown')}
-Ticket: {primary_ticket.get('ticket_id', 'Unknown')}
-Escalation Level: {escalation_level.upper()}
+    def _generate_stakeholder_message(self, handoff_request: Dict,
+                                    stakeholder: Dict,
+                                    escalation_ticket: Dict = None) -> tuple:
+        """Generar mensaje para stakeholder"""
+        employee_id = handoff_request.get("employee_id")
+        error_category = handoff_request.get("error_category", "unknown")
+        priority = handoff_request.get("handoff_priority", "medium")
+        
+        subject = f"Onboarding Alert - {error_category.replace('_', ' ').title()} Issue"
+        
+        message_lines = [
+            f"Onboarding system alert:",
+            "",
+            f"An issue has been detected that may require attention from your team.",
+            "",
+            f"**Employee ID:** {employee_id}",
+            f"**Issue Type:** {error_category.replace('_', ' ').title()}",
+            f"**Priority:** {priority.title()}",
+            f"**Status:** Escalated to specialist",
+        ]
+        
+        if escalation_ticket:
+            message_lines.extend([
+                "",
+                f"**Tracking:** {escalation_ticket.get('ticket_id')}",
+                f"**Assigned Team:** {escalation_ticket.get('assigned_team')}"
+            ])
+        
+        message_lines.extend([
+            "",
+            "This is an automated notification. No immediate action required unless specifically requested.",
+            "",
+            "Onboarding System"
+        ])
+        
+        return subject, "\n".join(message_lines)
 
-Multiple specialists have been notified and are responding.
-This incident is being tracked and will be resolved according to SLA requirements.
+    def _generate_management_message(self, handoff_request: Dict,
+                                   escalation_ticket: Dict = None) -> tuple:
+        """Generar mensaje para management"""
+        employee_id = handoff_request.get("employee_id")
+        error_category = handoff_request.get("error_category", "unknown")
+        priority = handoff_request.get("handoff_priority", "critical")
+        
+        subject = f"🚨 {priority.upper()} Onboarding Escalation - {employee_id}"
+        
+        message_lines = [
+            f"**CRITICAL ONBOARDING ESCALATION**",
+            "",
+            f"A {priority} priority issue requires management attention:",
+            "",
+            f"📋 **Employee:** {employee_id}",
+            f"⚠️ **Issue:** {error_category.replace('_', ' ').title()}",
+            f"🕐 **Detected:** {handoff_request.get('created_at', datetime.utcnow().isoformat())}",
+            f"🎯 **Priority:** {priority.upper()}",
+        ]
+        
+        if escalation_ticket:
+            message_lines.extend([
+                "",
+                f"🎫 **Ticket:** {escalation_ticket.get('ticket_id')}",
+                f"👤 **Assigned:** {escalation_ticket.get('assigned_to')}",
+                f"⏰ **Due:** {escalation_ticket.get('due_date')}"
+            ])
+        
+        message_lines.extend([
+            "",
+            "**Business Impact:** Employee onboarding delayed, potential cascade effects",
+            "",
+            "Please acknowledge this escalation and provide guidance if needed.",
+            "",
+            "🤖 Onboarding System"
+        ])
+        
+        return subject, "\n".join(message_lines)
 
-Dashboard: https://dashboard.empresa.com/management/escalations
-""",
-                priority_flag=True,
-                template_used="management_alert_template"
-            )
-            notifications.append(notification.dict())
-        
-        return notifications
-    
-    def _create_dashboard_notification(self, tickets: List[Dict], escalation_level: str) -> Dict:
-        """Crear notificación para dashboard"""
-        primary_ticket = tickets[0] if tickets else {}
-        
-        notification = NotificationEvent(
-            ticket_id=primary_ticket.get('ticket_id', 'unknown'),
-            session_id=primary_ticket.get('session_id', 'unknown'),
-            recipient="dashboard_system",
-            channel=NotificationChannel.DASHBOARD,
-            specialist_type=SpecialistType.SYSTEM_ADMIN,
-            subject="Dashboard Update",
-            message=f"New escalation created - {escalation_level} priority",
-            priority_flag=escalation_level in ["emergency", "critical"],
-            template_used="dashboard_update_template"
-        )
-        
-        notification_dict = notification.dict()
-        notification_dict["sent_at"] = datetime.utcnow()
-        notification_dict["delivered_at"] = datetime.utcnow()
-        
-        return notification_dict
-    
-    def _send_notification(self, notification: Dict, channel: NotificationChannel) -> Dict[str, Any]:
+    def _simulate_notification_delivery(self, notification: Dict, 
+                                      recipient_info: Dict) -> Dict[str, Any]:
         """Simular envío de notificación"""
-        try:
-            # Simular diferentes tasas de éxito por canal
-            success_rates = {
-                NotificationChannel.EMAIL: 0.95,
-                NotificationChannel.SLACK: 0.98,
-                NotificationChannel.SMS: 0.90,
-                NotificationChannel.PHONE: 0.85,
-                NotificationChannel.DASHBOARD: 0.99
-            }
-            
-            import random
-            success_rate = success_rates.get(channel, 0.95)
-            
-            if random.random() <= success_rate:
-                return {
-                    "success": True,
-                    "channel": channel.value,
-                    "delivery_time": datetime.utcnow().isoformat()
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": f"Delivery failed for {channel.value}",
-                    "channel": channel.value
-                }
-                
-        except Exception as e:
+        channel = notification.get("channel", "email")
+        
+        # Simulate different success rates by channel
+        success_rates = {
+            "slack": 0.95,
+            "teams": 0.90,
+            "email": 0.85,
+            "sms": 0.98
+        }
+        
+        import random
+        success_rate = success_rates.get(channel, 0.85)
+        delivery_successful = random.random() < success_rate
+        
+        if delivery_successful:
             return {
-                "success": False,
-                "error": f"Notification error: {str(e)}",
-                "channel": channel.value
+                "status": "sent",
+                "sent_at": datetime.utcnow().isoformat(),
+                "delivered_at": (datetime.utcnow() + timedelta(seconds=random.randint(1, 30))).isoformat(),
+                "delivery_attempts": 1
             }
+        else:
+            return {
+                "status": "failed",
+                "delivery_attempts": 1,
+                "last_attempt_at": datetime.utcnow().isoformat(),
+                "error": f"Failed to deliver via {channel}"
+            }
+
+    def _create_notification_summary(self, notifications: List[Dict]) -> Dict[str, Any]:
+        """Crear resumen de notificaciones"""
+        by_channel = {}
+        by_status = {}
+        by_recipient_type = {}
+        
+        for notification in notifications:
+            # By channel
+            channel = notification.get("channel", "unknown")
+            by_channel[channel] = by_channel.get(channel, 0) + 1
+            
+            # By status
+            status = notification.get("status", "unknown")
+            by_status[status] = by_status.get(status, 0) + 1
+            
+            # By recipient type
+            recipient_type = notification.get("recipient_type", "unknown")
+            by_recipient_type[recipient_type] = by_recipient_type.get(recipient_type, 0) + 1
+        
+        return {
+            "total_notifications": len(notifications),
+            "by_channel": by_channel,
+            "by_status": by_status,
+            "by_recipient_type": by_recipient_type,
+            "delivery_rate": by_status.get("sent", 0) / len(notifications) if notifications else 0.0
+        }
 
 # Export tools
 escalation_router_tool = EscalationRouterTool()

@@ -3868,12 +3868,12 @@
       "agent_states": {
         "recovery_agent": {
           "agent_id": "recovery_agent",
-          "status": "processing",
+          "status": "completed",
           "current_task": null,
           "progress": 0.0,
-          "last_updated": "2025-11-10T15:30:13.098742",
+          "last_updated": "2025-11-10T15:30:13.347087",
           "data": {
-            "current_task": "system_recovery",
+            "current_task": "completed",
             "recovery_id": "7ddb905e-46b7-430e-a1ad-c2a96984742d",
             "employee_id": "EMP_SCENARIO_TEST",
             "recovery_strategy": "graceful_degradation",
@@ -3883,8 +3883,8 @@
             "failed_at": "2025-11-10T15:30:12.543903",
             "recovery_status": "success",
             "system_recovered": true,
-            "actions_executed": 1,
-            "completed_at": "2025-11-10T15:30:13.044148"
+            "actions_executed": 3,
+            "completed_at": "2025-11-10T15:30:13.347087"
           },
           "errors": [],
           "metadata": {}
@@ -3933,7 +3933,53 @@
         }
       },
       "started_at": "2025-11-10T15:30:02.431261",
-      "updated_at": "2025-11-10T15:30:13.296697",
+      "updated_at": "2025-11-10T15:30:13.347087",
+      "priority": 1,
+      "requires_manual_review": false,
+      "config": {}
+    },
+    "9afb7749-7edb-4128-bdf1-c036d88dd8c5": {
+      "employee_id": "EMP_HANDOFF_001",
+      "session_id": "9afb7749-7edb-4128-bdf1-c036d88dd8c5",
+      "phase": "initiated",
+      "raw_data": {
+        "employee_id": "EMP_HANDOFF_001",
+        "first_name": "Ana",
+        "last_name": "Garc\u00eda",
+        "email": "ana.garcia@empresa.com",
+        "department": "Engineering",
+        "position": "Senior Software Engineer",
+        "hire_date": "2025-11-10T17:35:10.294175",
+        "manager_email": "manager@empresa.com"
+      },
+      "processed_data": {},
+      "validation_results": {},
+      "agent_states": {
+        "human_handoff_agent": {
+          "agent_id": "human_handoff_agent",
+          "status": "completed",
+          "current_task": null,
+          "progress": 0.0,
+          "last_updated": "2025-11-10T17:35:10.601134",
+          "data": {
+            "current_task": "completed",
+            "handoff_id": "667d735d-398e-49ab-8e0d-e62a2653e0c3",
+            "employee_id": "EMP_HANDOFF_001",
+            "error_category": "agent_failure",
+            "handoff_priority": "critical",
+            "started_at": "2025-11-10T17:35:10.395362",
+            "handoff_status": "assigned",
+            "specialist_assigned": true,
+            "context_preserved": true,
+            "notifications_sent": 4,
+            "completed_at": "2025-11-10T17:35:10.601134"
+          },
+          "errors": [],
+          "metadata": {}
+        }
+      },
+      "started_at": "2025-11-10T17:35:10.294175",
+      "updated_at": "2025-11-10T17:35:10.601134",
       "priority": 1,
       "requires_manual_review": false,
       "config": {}
@@ -4373,10 +4419,10 @@
     },
     "recovery_agent": {
       "agent_id": "recovery_agent",
-      "status": "processing",
+      "status": "completed",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-10T15:30:13.098742",
+      "last_updated": "2025-11-10T15:30:13.347087",
       "data": {
         "version": "1.0",
         "specialization": "system_recovery_state_restoration",
@@ -4426,7 +4472,7 @@
           "observability": "active",
           "circuit_breakers": "managed"
         },
-        "current_task": "system_recovery",
+        "current_task": "completed",
         "recovery_id": "7ddb905e-46b7-430e-a1ad-c2a96984742d",
         "employee_id": "EMP_SCENARIO_TEST",
         "recovery_strategy": "graceful_degradation",
@@ -4436,13 +4482,77 @@
         "failed_at": "2025-11-10T15:30:12.543903",
         "recovery_status": "success",
         "system_recovered": true,
-        "actions_executed": 1,
-        "completed_at": "2025-11-10T15:30:13.044148"
+        "actions_executed": 3,
+        "completed_at": "2025-11-10T15:30:13.347087"
+      },
+      "errors": [],
+      "metadata": {}
+    },
+    "human_handoff_agent": {
+      "agent_id": "human_handoff_agent",
+      "status": "completed",
+      "current_task": null,
+      "progress": 0.0,
+      "last_updated": "2025-11-10T17:35:10.601134",
+      "data": {
+        "version": "1.0",
+        "specialization": "human_escalation_context_preservation",
+        "tools_count": 4,
+        "capabilities": {
+          "specialist_routing": true,
+          "context_packaging": true,
+          "ticket_management": true,
+          "multi_channel_notifications": true,
+          "escalation_management": true,
+          "sla_tracking": true
+        },
+        "supported_priorities": [
+          "emergency",
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ],
+        "specialist_types": [
+          "it_specialist",
+          "hr_manager",
+          "legal_specialist",
+          "security_specialist",
+          "compliance_officer",
+          "system_admin",
+          "business_analyst",
+          "executive"
+        ],
+        "notification_channels": [
+          "slack",
+          "teams",
+          "email",
+          "sms"
+        ],
+        "integration_points": {
+          "error_classification_agent": "source",
+          "recovery_agent": "source",
+          "ticketing_system": "active",
+          "notification_systems": "active",
+          "state_management": "active",
+          "audit_trail": "active"
+        },
+        "current_task": "completed",
+        "handoff_id": "667d735d-398e-49ab-8e0d-e62a2653e0c3",
+        "employee_id": "EMP_HANDOFF_001",
+        "error_category": "agent_failure",
+        "handoff_priority": "critical",
+        "started_at": "2025-11-10T17:35:10.395362",
+        "handoff_status": "assigned",
+        "specialist_assigned": true,
+        "context_preserved": true,
+        "notifications_sent": 4,
+        "completed_at": "2025-11-10T17:35:10.601134"
       },
       "errors": [],
       "metadata": {}
     }
   },
   "system_metrics": {},
-  "last_updated": "2025-11-10T15:30:13.296697"
+  "last_updated": "2025-11-10T17:35:10.601134"
 }

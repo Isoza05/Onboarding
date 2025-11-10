@@ -1,7 +1,9 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable
 from functools import wraps
 import time
 from datetime import datetime
+import logging
+import json
 
 try:
     from langfuse import Langfuse

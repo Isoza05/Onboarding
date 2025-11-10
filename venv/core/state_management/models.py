@@ -72,3 +72,5 @@ class StateEvent(BaseModel):
     event_type: str  # "state_change", "data_update", "error", etc.
     data: Dict[str, Any] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    

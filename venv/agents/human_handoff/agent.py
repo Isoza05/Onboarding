@@ -10,8 +10,9 @@ from .tools import (
     ticket_manager_tool, notification_system_tool
 )
 from .schemas import (
-    HandoffRequest, HandoffResult, HandoffStatus, EscalationLevel,
-    SpecialistAssignment, ContextPackage, EscalationTicket, NotificationEvent
+    HandoffRequest, HandoffResult, HandoffStatus, HandoffPriority,
+    SpecialistType, SpecialistAssignment, ContextPackage,
+    EscalationTicket, NotificationEvent
 )
 
 # Imports para integración
@@ -25,23 +26,31 @@ class HumanHandoffAgent(BaseAgent):
     Human Handoff Agent - Especialista en escalación humana y preservación de contexto.
     
     Implementa arquitectura BDI:
-    - Beliefs: La escalación oportuna a especialistas humanos resuelve problemas complejos
-    - Desires: Handoff perfecto con contexto completo preservado
-    - Intentions: Enrutar inteligentemente, preservar contexto, trackear resolución
+    - Beliefs: La escalación humana oportuna con contexto completo acelera la resolución
+    - Desires: Conectar problemas complejos con especialistas apropiados eficientemente
+    - Intentions: Enrutar, empaquetar contexto, crear tickets, notificar stakeholders
     
-    Utiliza patrón ReAct para decisiones de escalación inteligentes.
+    Recibe requests de Error Classification Agent y Recovery Agent para escalación
+    a especialistas humanos apropiados con contexto completo preservado.
     """
-    
+
     def __init__(self):
         super().__init__(
             agent_id="human_handoff_agent",
             agent_name="Human Handoff & Context Preservation Agent"
         )
         
-        # Configuración de escalación
+        # Configuración específica del handoff
         self.active_handoffs = {}
-        self.specialist_directory = self._load_specialist_directory()
-        self.escalation_rules = self._load_escalation_rules()
+        self.handoff_history = {}
+        self.specialist_directory = {}
+        self.handoff_metrics = {
+            "total_handoffs": 0,
+            "successful_handoffs": 0,
+            "failed_handoffs": 0,
+            "average_resolution_time": 0.0,
+            "context_preservation_rate": 1.0
+        }
         
         # Registrar agente en state management
         state_manager.register_agent(
@@ -52,45 +61,43 @@ class HumanHandoffAgent(BaseAgent):
                 "tools_count": len(self.tools),
                 "capabilities": {
                     "specialist_routing": True,
-                    "context_preservation": True,
+                    "context_packaging": True,
                     "ticket_management": True,
-                    "multi_channel_notification": True,
-                    "escalation_tracking": True,
-                    "sla_compliance": True
+                    "multi_channel_notifications": True,
+                    "escalation_management": True,
+                    "sla_tracking": True
                 },
-                "supported_escalation_levels": [level.value for level in EscalationLevel],
-                "notification_channels": ["slack", "email", "sms", "phone", "dashboard"],
-                "specialist_types": [
-                    "it_specialist", "hr_manager", "legal_counsel", 
-                    "security_analyst", "compliance_officer", "management"
-                ],
+                "supported_priorities": [priority.value for priority in HandoffPriority],
+                "specialist_types": [spec_type.value for spec_type in SpecialistType],
+                "notification_channels": ["slack", "teams", "email", "sms"],
                 "integration_points": {
-                    "error_classification": "receives_classifications",
-                    "recovery_agent": "receives_failed_recoveries", 
-                    "progress_tracker": "receives_critical_alerts",
-                    "ticketing_systems": "creates_manages_tickets",
-                    "notification_systems": "multi_channel_alerts"
+                    "error_classification_agent": "source",
+                    "recovery_agent": "source", 
+                    "ticketing_system": "active",
+                    "notification_systems": "active",
+                    "state_management": "active",
+                    "audit_trail": "active"
                 }
             }
         )
         
-        self.logger.info("Human Handoff Agent integrado con State Management y Escalation Systems")
-    
+        self.logger.info("Human Handoff Agent integrado con State Management y Escalation System")
+
     def _initialize_tools(self) -> List:
-        """Inicializar herramientas de escalación humana"""
+        """Inicializar herramientas de handoff"""
         return [
             escalation_router_tool,
-            context_packager_tool, 
+            context_packager_tool,
             ticket_manager_tool,
             notification_system_tool
         ]
-    
+
     def _create_prompt(self) -> ChatPromptTemplate:
         """Crear prompt con framework BDI y patrón ReAct para handoff humano"""
         bdi = self._get_bdi_framework()
         
         system_prompt = f"""
-Eres el Human Handoff Agent, especialista en escalación humana y preservación de contexto crítico.
+Eres el Human Handoff Agent, especialista en escalación humana y preservación de contexto del sistema de onboarding.
 
 ## FRAMEWORK BDI (Belief-Desire-Intention)
 **BELIEFS (Creencias):**
@@ -102,323 +109,694 @@ Eres el Human Handoff Agent, especialista en escalación humana y preservación 
 **INTENTIONS (Intenciones):**
 {bdi['intentions']}
 
-## HERRAMIENTAS DE ESCALACIÓN:
-- escalation_router_tool: Determina especialista apropiado según error y contexto
-- context_packager_tool: Empaqueta contexto completo para handoff perfecto
-- ticket_manager_tool: Crea y gestiona tickets en sistemas externos
-- notification_system_tool: Notifica stakeholders por múltiples canales
+## HERRAMIENTAS DE HANDOFF:
+- escalation_router_tool: Determina especialista humano más apropiado basado en expertise y disponibilidad
+- context_packager_tool: Empaqueta contexto completo del empleado, error y sistema para handoff
+- ticket_manager_tool: Crea y gestiona tickets de escalación en sistema de ticketing
+- notification_system_tool: Notifica stakeholders apropiados via múltiples canales
 
-## TIPOS DE ESCALACIÓN:
-**IT Issues:** IT Department + System Admins
-**HR Issues:** HR Managers + Compliance Team  
-**Legal Issues:** Legal Department + Contract Specialists
-**Security Issues:** Security Team + CISO Office
-**Business Issues:** Management + Department Heads
+## TIPOS DE ESPECIALISTAS DISPONIBLES:
+- **IT_SPECIALIST**: Fallos de agentes, errores de sistema, problemas de integración
+- **HR_MANAGER**: Problemas de calidad, validación de datos, compliance HR
+- **LEGAL_SPECIALIST**: Violaciones de reglas de negocio, problemas contractuales
+- **SECURITY_SPECIALIST**: Issues de seguridad, autenticación, compliance de seguridad
+- **COMPLIANCE_OFFICER**: Problemas regulatorios, auditoría, governance
+- **SYSTEM_ADMIN**: Problemas de infraestructura, performance, disponibilidad
+- **BUSINESS_ANALYST**: Análisis de impacto, optimización de procesos
+- **EXECUTIVE**: Escalaciones críticas, decisiones de alto nivel
 
-## NIVELES DE PRIORIDAD:
-- **EMERGENCY:** Respuesta <5 min, múltiples canales, management alertado
-- **CRITICAL:** Respuesta <15 min, Slack + Email + SMS, backup notificado
-- **HIGH:** Respuesta <1 hour, Slack + Email, especialista principal
-- **MEDIUM:** Respuesta <4 hours, Email + Dashboard, proceso estándar
-- **LOW:** Respuesta <24 hours, Email, baja prioridad
+## NIVELES DE PRIORIDAD Y SLA:
+- **EMERGENCY**: <5 min respuesta, escalación inmediata a management
+- **CRITICAL**: <15 min respuesta, notificación a senior staff
+- **HIGH**: <1 hora respuesta, asignación prioritaria
+- **MEDIUM**: <4 horas respuesta, procesamiento normal
+- **LOW**: <24 horas respuesta, cola estándar
+
+## CANALES DE NOTIFICACIÓN:
+- **Slack**: Alertas inmediatas, colaboración en tiempo real
+- **Teams**: Notificaciones corporativas, coordinación de equipos
+- **Email**: Comunicación formal, documentación de escalaciones
+- **SMS**: Solo para emergencias críticas que requieren respuesta inmediata
+- **Dashboard**: Updates en tiempo real, métricas de seguimiento
 
 ## PATRÓN REACT (Reason-Act-Observe):
 **1. REASON (Razonar):**
-- Analizar clasificación de error y contexto del empleado
-- Evaluar intentos de recuperación fallidos y severidad del problema
-- Determinar especialistas apropiados según tipo de error y departamento
-- Calcular SLA deadlines y urgencia de respuesta requerida
+- Analizar HandoffRequest recibido de Error Classification o Recovery Agent
+- Evaluar severidad, categoría de error y contexto de escalación
+- Determinar tipo de especialista requerido y nivel de prioridad apropiado
+- Identificar stakeholders que deben ser notificados según impacto
 
 **2. ACT (Actuar):**
-- Usar escalation_router_tool para asignar especialistas apropiados
-- Usar context_packager_tool para preservar contexto completo del empleado
-- Usar ticket_manager_tool para crear tickets con información detallada
-- Usar notification_system_tool para alertar especialistas por canales apropiados
+- Ejecutar escalation_router_tool para encontrar especialista más apropiado
+- Usar context_packager_tool para crear paquete completo de contexto
+- Aplicar ticket_manager_tool para crear ticket de escalación rastreable
+- Implementar notification_system_tool para notificar todos los stakeholders
 
 **3. OBSERVE (Observar):**
-- Verificar que especialistas reciban notificaciones y contexto completo
-- Confirmar creación de tickets con SLA tracking y escalation paths
-- Validar preservación de contexto crítico sin pérdida de información
-- Monitorear acknowledgments y inicio de trabajo por especialistas
+- Verificar que especialista asignado tenga expertise apropiado y disponibilidad
+- Confirmar que contexto empaquetado sea completo y preserve información crítica
+- Validar que ticket sea creado exitosamente con SLA tracking apropiado
+- Asegurar que notificaciones sean entregadas a todos los recipients requeridos
+
+## CRITERIOS DE ESCALACIÓN ROUTING:
+**Automático por Categoría de Error:**
+- agent_failure + timeout → IT Specialist + System Admin
+- quality_failure + compliance → HR Manager + Compliance Officer
+- security_issue → Security Specialist + CISO (si crítico)
+- sla_breach + critical → IT Manager + Operations Director
+- data_validation + corruption → IT Specialist + Legal Specialist
+
+**Manual por Prioridad:**
+- EMERGENCY → Escalación inmediata a Executive level
+- CRITICAL → Senior management + Specialist apropiado
+- HIGH → Department manager + Primary specialist
+
+## PRESERVACIÓN DE CONTEXTO:
+**Contexto del Empleado:**
+- Datos completos del empleado y progreso de onboarding
+- Timeline de journey y estados de agentes
+- Documentos, formularios y attachments relevantes
+
+**Contexto del Error:**
+- Timeline completo de errores y eventos
+- Operaciones fallidas y recovery attempts
+- System state snapshots y configuration data
+
+**Contexto del Negocio:**
+- Business impact assessment y stakeholder impact
+- SLA status y compliance requirements
+- Recommendations y suggested actions
+
+## INTEGRACIÓN CON TICKETING:
+- **Ticket Creation**: Automático con contexto completo
+- **SLA Tracking**: Basado en prioridad y tipo de issue
+- **Status Updates**: Tiempo real con stakeholder notifications
+- **Resolution Tracking**: Métricas de performance y satisfaction
+
+## ESCALATION CHAIN MANAGEMENT:
+**Nivel 1**: Primary Specialist (expertise match)
+**Nivel 2**: Department Manager (escalación departamental)
+**Nivel 3**: Senior Management (issues críticos)
+**Nivel 4**: Executive Leadership (emergencias de negocio)
 
 ## INSTRUCCIONES CRÍTICAS:
-1. SIEMPRE preserva contexto completo - no aceptes pérdida de información
-2. Asigna especialistas basado en expertise y disponibilidad actual
-3. Crea tickets detallados con información actionable para resolución
-4. Notifica por múltiples canales según urgencia - garantiza recepción
-5. Trackea SLAs y escala automáticamente si no hay respuesta oportuna
-6. Mantén audit trail completo para accountability y mejora continua
+1. SIEMPRE determina el especialista más apropiado antes de crear contexto package
+2. Empaqueta contexto completo preservando información crítica del empleado
+3. Crea tickets de escalación con SLA tracking apropiado para prioridad
+4. Notifica todos los stakeholders relevantes usando canales apropiados
+5. Mantén escalation chain clara con fallbacks y backup specialists
+6. Documenta handoff completamente para audit trail y lessons learned
 
-Escala con precisión quirúrgica, preserva contexto con integridad total y trackea con vigilancia constante.
+Escala con precisión estratégica, preserva contexto con integridad completa y comunica con claridad profesional.
 """
-
+        
         return ChatPromptTemplate.from_messages([
             ("system", system_prompt),
             ("user", "{input}"),
-            ("assistant", "Voy a ejecutar escalación humana preservando contexto completo y asignando especialistas apropiados."),
+            ("assistant", "Voy a ejecutar el handoff humano apropiado preservando contexto completo y asegurando escalación efectiva."),
             ("placeholder", "{agent_scratchpad}")
         ])
-    
+
     def _get_bdi_framework(self) -> Dict[str, str]:
-        """Framework BDI específico para escalación humana"""
+        """Framework BDI específico para handoff humano"""
         return {
             "beliefs": """
-• La escalación oportuna a especialistas humanos es esencial para resolver problemas complejos
-• La preservación completa del contexto evita pérdida de información crítica
-• Los especialistas correctos resuelven problemas más rápido que asignaciones genéricas
-• Las notificaciones multi-canal garantizan recepción oportuna de escalaciones
-• El tracking proactivo de SLAs previene violaciones y mejora accountability
-• Los sistemas de tickets estructurados facilitan colaboración y seguimiento
+• La escalación humana oportuna con contexto completo acelera significativamente la resolución de problemas
+• Diferentes tipos de errores requieren expertise específico de especialistas humanos calificados
+• La preservación completa de contexto evita pérdida de información crítica durante handoffs
+• Las notificaciones multi-canal aseguran que stakeholders sean informados apropiadamente
+• Los SLAs basados en prioridad garantizan respuesta apropiada según criticidad del negocio
+• La documentación completa de handoffs facilita análisis post-mortem y mejora continua
 """,
             "desires": """
-• Lograr handoff perfecto con cero pérdida de contexto crítico
-• Asignar siempre el especialista más apropiado para cada tipo de problema
-• Garantizar respuesta oportuna dentro de SLAs establecidos por prioridad
-• Proporcionar información completa y actionable para resolución rápida
-• Mantener visibilidad total del proceso de escalación para stakeholders
-• Minimizar tiempo de resolución mediante escalación inteligente
+• Conectar problemas complejos con especialistas humanos más apropiados eficientemente
+• Preservar contexto completo del empleado y error para facilitar resolución rápida
+• Crear tickets de escalación rastreables con SLA management apropiado
+• Notificar stakeholders relevantes usando canales más efectivos para cada situación
+• Mantener escalation chains claras con fallbacks para asegurar cobertura continua
+• Proporcionar handoffs que resulten en resolución exitosa y satisfacción del cliente
 """,
             "intentions": """
-• Analizar error classification y determinar routing óptimo a especialistas
-• Empaquetar contexto completo preservando información crítica del empleado
-• Crear tickets detallados con información actionable y tracking SLA
-• Notificar especialistas por canales apropiados según urgencia y disponibilidad
-• Trackear acknowledgments y progreso de resolución con escalación automática
-• Mantener audit trail completo para compliance y análisis post-mortem
+• Evaluar requests de handoff y determinar routing más apropiado basado en expertise requerido
+• Empaquetar contexto completo preservando información crítica del empleado, error y sistema
+• Crear tickets de escalación con tracking apropiado y SLA management basado en prioridad
+• Ejecutar notificaciones multi-canal a especialistas y stakeholders según urgencia y tipo
+• Gestionar escalation chains con backup specialists y fallback procedures
+• Documentar handoffs completamente para audit trail, métricas y mejora continua del proceso
 """
         }
-    
+
     def _format_input(self, input_data: Any) -> str:
-        """Formatear datos de entrada para escalación humana"""
+        """Formatear datos de entrada para handoff"""
         if isinstance(input_data, HandoffRequest):
             return f"""
-Ejecuta escalación humana para el siguiente caso crítico:
+Ejecuta handoff humano completo para el siguiente caso:
 
-**INFORMACIÓN DE ESCALACIÓN:**
+**INFORMACIÓN DE HANDOFF:**
+- Handoff ID: {input_data.handoff_id}
 - Employee ID: {input_data.employee_id}
 - Session ID: {input_data.session_id}
-- Escalation Level: {input_data.escalation_level.value}
-- Timestamp: {input_data.timestamp.isoformat()}
+- Source Agent: {input_data.source_agent}
 
-**ERROR CLASSIFICATION:**
-{json.dumps(input_data.error_classification, indent=2, default=str)}
+**CLASIFICACIÓN DEL PROBLEMA:**
+- Error Category: {input_data.error_category}
+- Error Severity: {input_data.error_severity}
+- Handoff Priority: {input_data.handoff_priority.value}
+- Business Impact: {input_data.business_impact}
+
+**CONTEXTO DE ESCALACIÓN:**
+- Requires Immediate Attention: {'Sí' if input_data.requires_immediate_attention else 'No'}
+- SLA Deadline: {input_data.sla_deadline.isoformat() if input_data.sla_deadline else 'No definido'}
+- Escalation Level: {input_data.escalation_level}
+
+**PREFERENCIAS DE ROUTING:**
+- Preferred Specialist: {input_data.preferred_specialist_type.value if input_data.preferred_specialist_type else 'Auto-determine'}
+- Department Routing: {input_data.department_routing or 'Auto-determine'}
+
+**CONTEXTO DEL ERROR:**
+{json.dumps(input_data.error_context, indent=2, default=str)}
 
 **RECOVERY ATTEMPTS:**
-{json.dumps(input_data.recovery_attempts, indent=2, default=str)}
-
-**BUSINESS CONTEXT:**
-- Context Preservation Required: {'Sí' if input_data.context_preservation_required else 'No'}
-- Specialist Preferences: {[s.value for s in input_data.specialist_preferences] if input_data.specialist_preferences else 'None specified'}
-- Urgency Reason: {input_data.urgency_reason or 'Standard escalation'}
-- Business Impact: {input_data.business_impact or 'Impact assessment pending'}
+{len(input_data.recovery_attempts)} intentos de recuperación previos
 
 **INSTRUCCIONES DE HANDOFF:**
-1. Usa escalation_router_tool para determinar especialistas apropiados
-2. Usa context_packager_tool para preservar contexto completo sin pérdida
-3. Usa ticket_manager_tool para crear tickets con SLA tracking
-4. Usa notification_system_tool para alertar especialistas por canales apropiados
+1. Usa escalation_router_tool para determinar especialista más apropiado
+2. Usa context_packager_tool para empaquetar contexto completo preservando información crítica
+3. Usa ticket_manager_tool para crear ticket de escalación con SLA tracking
+4. Usa notification_system_tool para notificar especialista y stakeholders apropiados
 
-**OBJETIVO:** Escalación perfecta con contexto preservado y especialistas notificados.
+**OBJETIVO:** Ejecutar handoff completo con preservación de contexto para resolución efectiva.
 """
         elif isinstance(input_data, dict):
             return f"""
-Procesa escalación humana para:
+Ejecuta handoff humano para el siguiente caso:
 {json.dumps(input_data, indent=2, default=str)}
 
-Ejecuta handoff completo con preservación de contexto y notificación multi-canal.
+Ejecuta handoff completo: routing + contexto + ticket + notificaciones.
 """
         else:
             return str(input_data)
-    
+
     def _format_output(self, result: Any, processing_time: float, success: bool, error: str = None) -> Dict[str, Any]:
-        """Formatear salida de escalación humana"""
+        """Formatear salida de handoff"""
         if not success:
             return {
                 "success": False,
-                "message": f"Error en escalación humana: {error}",
+                "message": f"Error en handoff: {error}",
                 "errors": [error] if error else [],
                 "agent_id": self.agent_id,
                 "processing_time": processing_time,
-                "handoff_status": HandoffStatus.FAILED.value,
-                "specialists_assigned": 0,
+                "handoff_status": HandoffStatus.CANCELLED.value,
+                "specialist_assigned": False,
                 "context_preserved": False,
                 "notifications_sent": 0,
-                "tickets_created": 0,
-                "next_actions": ["Revisar errores de escalación", "Reintentar handoff", "Escalación manual requerida"]
+                "requires_manual_escalation": True,
+                "next_actions": ["Escalación manual requerida", "Revisar errores de handoff"]
             }
-        
+
         try:
+            # Extraer resultados de herramientas
             routing_result = None
-            context_package = None
+            context_result = None
             ticket_result = None
             notification_result = None
-            
+
             if isinstance(result, dict) and "intermediate_steps" in result:
                 for step_name, step_result in result["intermediate_steps"]:
-                    if "escalation_router" in step_name and isinstance(step_result, dict) and step_result.get("success"):
-                        routing_result = step_result.get("routing_result", {})
-                    elif "context_packager" in step_name and isinstance(step_result, dict) and step_result.get("success"):
-                        context_package = step_result.get("context_package", {})
-                    elif "ticket_manager" in step_name and isinstance(step_result, dict) and step_result.get("success"):
-                        ticket_result = step_result.get("ticket_management_result", {})
-                    elif "notification_system" in step_name and isinstance(step_result, dict) and step_result.get("success"):
-                        notification_result = step_result.get("notification_result", {})
-            
-            specialists_assigned = len(routing_result.get("specialist_assignments", [])) if routing_result else 0
-            tickets_created = len(ticket_result.get("tickets_created", [])) if ticket_result else 0
-            notifications_sent = len(notification_result.get("notifications_sent", [])) if notification_result else 0
-            
-            handoff_successful = all([
-                routing_result and routing_result.get("primary_department"),
-                context_package and context_package.get("package_id"),
-                ticket_result and ticket_result.get("tickets_created"),
-                notification_result and notification_result.get("notifications_sent")
-            ])
-            
-            escalation_level = routing_result.get("escalation_level", "medium") if routing_result else "medium"
-            primary_department = routing_result.get("primary_department", "unknown") if routing_result else "unknown"
-            
-            immediate_actions = []
-            if handoff_successful:
-                immediate_actions = [
-                    "Specialists notified and context preserved",
-                    "Monitor specialist acknowledgment and response",
-                    "Track SLA compliance and escalation deadlines",
-                    "Update stakeholders on handoff completion"
-                ]
-            else:
-                immediate_actions = [
-                    "Review handoff failures and retry",
-                    "Escalate to backup specialists if available",
-                    "Consider manual intervention and direct contact",
-                    "Update error classification with handoff issues"
-                ]
-            
+                    if "escalation_router_tool" in step_name and isinstance(step_result, dict):
+                        routing_result = step_result
+                    elif "context_packager_tool" in step_name and isinstance(step_result, dict):
+                        context_result = step_result
+                    elif "ticket_manager_tool" in step_name and isinstance(step_result, dict):
+                        ticket_result = step_result
+                    elif "notification_system_tool" in step_name and isinstance(step_result, dict):
+                        notification_result = step_result
+
+            # Determinar estado del handoff
+            handoff_status = self._determine_handoff_status(
+                routing_result, context_result, ticket_result, notification_result
+            )
+
+            # Extraer specialist assignment
+            specialist_assignment = None
+            if routing_result and routing_result.get("success"):
+                specialist_assignment = routing_result.get("specialist_assignment")
+
+            # Extraer context package
+            context_package = None
+            context_preservation_score = 0.0
+            if context_result and context_result.get("success"):
+                context_package = context_result.get("context_package")
+                context_preservation_score = context_result.get("package_completeness", 0.0)
+
+            # Extraer escalation ticket
+            escalation_ticket = None
+            if ticket_result and ticket_result.get("success"):
+                escalation_ticket = ticket_result.get("escalation_ticket")
+
+            # Extraer notificaciones
+            notifications_sent = []
+            successful_notifications = 0
+            if notification_result and notification_result.get("success"):
+                notifications_sent = notification_result.get("notifications_sent", [])
+                successful_notifications = notification_result.get("successful_notifications", 0)
+
+            # Evaluar handoff exitoso
+            handoff_successful = self._evaluate_handoff_success(
+                handoff_status, specialist_assignment, context_package, escalation_ticket
+            )
+
+            # Calcular métricas de handoff
+            handoff_metrics = self._calculate_handoff_metrics(
+                processing_time, context_preservation_score, successful_notifications
+            )
+
+            # Generar próximas acciones
+            next_actions = self._generate_handoff_next_actions(
+                handoff_status, specialist_assignment, escalation_ticket
+            )
+
+            # Generar recomendaciones
+            recommendations = self._generate_handoff_recommendations(
+                routing_result, context_result, notification_result
+            )
+
             return {
                 "success": handoff_successful,
-                "message": "Escalación humana completada exitosamente" if handoff_successful else "Escalación humana completada con problemas",
+                "message": "Handoff humano completado exitosamente" if handoff_successful else "Handoff parcial o fallido",
                 "agent_id": self.agent_id,
                 "processing_time": processing_time,
-                
-                "handoff_summary": {
-                    "handoff_status": HandoffStatus.ASSIGNED.value if handoff_successful else HandoffStatus.PENDING.value,
-                    "escalation_level": escalation_level,
-                    "primary_department": primary_department,
-                    "specialists_assigned": specialists_assigned,
-                    "context_preserved": context_package is not None,
-                    "tickets_created": tickets_created,
-                    "notifications_sent": notifications_sent
-                },
-                
-                "specialist_assignments": routing_result.get("specialist_assignments", []) if routing_result else [],
-                "context_package_id": context_package.get("package_id") if context_package else None,
-                "context_completeness": context_package.get("context_completeness", 0) if context_package else 0,
-                
-                "ticket_details": {
-                    "primary_ticket_id": ticket_result.get("primary_ticket_id") if ticket_result else None,
-                    "external_references": ticket_result.get("external_references", {}) if ticket_result else {},
-                    "sla_deadline": routing_result.get("sla_deadline") if routing_result else None
-                },
-                
-                "notification_summary": {
-                    "channels_used": notification_result.get("channels_used", []) if notification_result else [],
-                    "management_notified": notification_result.get("priority_notifications", False) if notification_result else False,
-                    "dashboard_updated": notification_result.get("dashboard_updated", False) if notification_result else False
-                },
-                
-                "tracking_information": {
-                    "handoff_tracking_active": handoff_successful,
-                    "sla_monitoring_enabled": True,
-                    "escalation_chain_ready": handoff_successful,
-                    "audit_trail_created": True
-                },
-                
-                "immediate_actions_required": immediate_actions,
-                "next_phase": "specialist_resolution" if handoff_successful else "handoff_retry",
-                
+
+                # Estado del handoff
+                "handoff_status": handoff_status.value if isinstance(handoff_status, HandoffStatus) else str(handoff_status),
+                "handoff_completed_at": datetime.utcnow().isoformat(),
+
+                # Resultados principales
+                "specialist_assignment": specialist_assignment,
+                "context_package": context_package,
+                "escalation_ticket": escalation_ticket,
+
+                # Notificaciones
+                "notifications_sent": notifications_sent,
+                "successful_notifications": successful_notifications,
+                "failed_notifications": len(notifications_sent) - successful_notifications,
+
+                # Métricas de calidad
+                "context_preservation_score": context_preservation_score,
+                "handoff_quality_score": self._calculate_handoff_quality_score(
+                    routing_result, context_result, ticket_result, notification_result
+                ),
+
+                # Estado de asignación
+                "specialist_assigned": specialist_assignment is not None,
+                "specialist_notified": successful_notifications > 0,
+                "context_preserved": context_preservation_score >= 0.7,
+
+                # Tracking y seguimiento
+                "escalation_path_clear": self._assess_escalation_path(routing_result),
+                "sla_compliance_status": self._assess_sla_compliance(escalation_ticket),
+                "business_continuity_maintained": handoff_successful,
+
+                # Próximos pasos
+                "next_actions": next_actions,
+                "recommendations": recommendations,
+                "follow_up_required": self._determine_follow_up_required(handoff_status),
+
+                # Audit trail
+                "handoff_timeline": self._create_handoff_timeline(
+                    routing_result, context_result, ticket_result, notification_result
+                ),
+
+                # Metadatos
                 "errors": [],
-                "warnings": self._generate_handoff_warnings(routing_result, context_package, ticket_result, notification_result)
+                "warnings": self._generate_handoff_warnings(
+                    routing_result, context_result, notification_result
+                )
             }
-            
+
         except Exception as e:
-            self.logger.error(f"Error formateando salida de escalación: {e}")
+            self.logger.error(f"Error formateando salida de handoff: {e}")
             return {
                 "success": False,
-                "message": f"Error procesando resultados de escalación: {e}",
+                "message": f"Error procesando handoff: {e}",
                 "errors": [str(e)],
                 "agent_id": self.agent_id,
                 "processing_time": processing_time,
-                "handoff_status": HandoffStatus.FAILED.value,
-                "specialists_assigned": 0,
+                "handoff_status": HandoffStatus.CANCELLED.value,
+                "specialist_assigned": False,
                 "context_preserved": False,
-                "immediate_actions_required": ["Reintentar escalación completa", "Verificar conectividad con sistemas"]
+                "requires_manual_escalation": True
             }
-    
-    @observability_manager.trace_agent_execution("human_handoff_agent")
-    def execute_human_handoff(self, handoff_request: HandoffRequest, session_id: str = None) -> Dict[str, Any]:
-        """Ejecutar escalación humana completa"""
-        handoff_id = f"handoff_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{handoff_request.employee_id}"
-        
+
+    def _determine_handoff_status(self, routing_result: Optional[Dict],
+                                 context_result: Optional[Dict],
+                                 ticket_result: Optional[Dict],
+                                 notification_result: Optional[Dict]) -> HandoffStatus:
+        """Determinar estado del handoff"""
+        successful_steps = 0
+        total_steps = 4
+
+        if routing_result and routing_result.get("success"):
+            successful_steps += 1
+        if context_result and context_result.get("success"):
+            successful_steps += 1
+        if ticket_result and ticket_result.get("success"):
+            successful_steps += 1
+        if notification_result and notification_result.get("success"):
+            successful_steps += 1
+
+        success_rate = successful_steps / total_steps
+
+        if success_rate >= 0.8:
+            return HandoffStatus.ASSIGNED
+        elif success_rate >= 0.5:
+            return HandoffStatus.PENDING
+        else:
+            return HandoffStatus.CANCELLED
+
+    def _evaluate_handoff_success(self, handoff_status: HandoffStatus,
+                                 specialist_assignment: Optional[Dict],
+                                 context_package: Optional[Dict],
+                                 escalation_ticket: Optional[Dict]) -> bool:
+        """Evaluar si el handoff fue exitoso"""
+        return (
+            handoff_status == HandoffStatus.ASSIGNED and
+            specialist_assignment is not None and
+            context_package is not None and
+            escalation_ticket is not None
+        )
+
+    def _calculate_handoff_metrics(self, processing_time: float,
+                                  context_score: float,
+                                  notifications_sent: int) -> Dict[str, Any]:
+        """Calcular métricas del handoff"""
+        return {
+            "handoff_duration_seconds": processing_time,
+            "context_preservation_score": context_score,
+            "notifications_delivered": notifications_sent,
+            "handoff_efficiency": notifications_sent / max(1, processing_time),
+            "overall_handoff_score": (context_score + min(1.0, notifications_sent / 3.0)) / 2.0
+        }
+
+    def _generate_handoff_next_actions(self, handoff_status: HandoffStatus,
+                                      specialist_assignment: Optional[Dict],
+                                      escalation_ticket: Optional[Dict]) -> List[str]:
+        """Generar próximas acciones post-handoff"""
+        actions = []
+
+        if handoff_status == HandoffStatus.ASSIGNED:
+            actions.extend([
+                "Monitor specialist response and acknowledgment",
+                "Track SLA compliance and resolution progress",
+                "Prepare for follow-up if needed",
+                "Update stakeholders on assignment status"
+            ])
+        elif handoff_status == HandoffStatus.PENDING:
+            actions.extend([
+                "Complete pending handoff steps",
+                "Verify specialist availability and notify backup",
+                "Ensure context package completeness",
+                "Escalate if no response within SLA"
+            ])
+        else:
+            actions.extend([
+                "Manual escalation required immediately",
+                "Review handoff failures and correct issues",
+                "Notify management of handoff problems",
+                "Implement emergency contingency procedures"
+            ])
+
+        # Add ticket-specific actions
+        if escalation_ticket:
+            actions.append(f"Monitor ticket {escalation_ticket.get('ticket_id')} for updates")
+
+        return actions
+
+    def _generate_handoff_recommendations(self, routing_result: Optional[Dict],
+                                        context_result: Optional[Dict],
+                                        notification_result: Optional[Dict]) -> List[str]:
+        """Generar recomendaciones basadas en handoff"""
+        recommendations = []
+
+        # Routing recommendations
+        if routing_result and routing_result.get("assignment_confidence", 0) < 0.8:
+            recommendations.append("Review specialist assignment criteria for better matching")
+
+        # Context recommendations
+        if context_result and context_result.get("package_completeness", 0) < 0.8:
+            recommendations.append("Improve context collection processes to increase completeness")
+
+        # Notification recommendations
+        if notification_result and notification_result.get("failed_notifications", 0) > 0:
+            recommendations.append("Review notification delivery mechanisms and backup channels")
+
+        # General recommendations
+        recommendations.extend([
+            "Document handoff outcome for process improvement",
+            "Review specialist response times and satisfaction",
+            "Analyze handoff patterns for optimization opportunities"
+        ])
+
+        return recommendations
+
+    def _calculate_handoff_quality_score(self, routing_result: Optional[Dict],
+                                       context_result: Optional[Dict],
+                                       ticket_result: Optional[Dict],
+                                       notification_result: Optional[Dict]) -> float:
+        """Calcular score de calidad del handoff"""
+        quality_factors = []
+
+        # Routing quality
+        if routing_result and routing_result.get("success"):
+            confidence = routing_result.get("assignment_confidence", 0.5)
+            quality_factors.append(confidence)
+
+        # Context quality
+        if context_result and context_result.get("success"):
+            completeness = context_result.get("package_completeness", 0.5)
+            quality_factors.append(completeness)
+
+        # Ticket quality
+        if ticket_result and ticket_result.get("success"):
+            quality_factors.append(1.0)  # Ticket created successfully
+
+        # Notification quality
+        if notification_result and notification_result.get("success"):
+            delivery_rate = notification_result.get("successful_notifications", 0) / max(1, notification_result.get("total_notifications", 1))
+            quality_factors.append(delivery_rate)
+
+        return sum(quality_factors) / len(quality_factors) if quality_factors else 0.5
+
+    def _assess_escalation_path(self, routing_result: Optional[Dict]) -> bool:
+        """Evaluar si el escalation path está claro"""
+        if not routing_result or not routing_result.get("success"):
+            return False
+
+        escalation_chain = routing_result.get("escalation_chain", [])
+        return len(escalation_chain) >= 2  # At least primary and backup
+
+    def _assess_sla_compliance(self, escalation_ticket: Optional[Dict]) -> str:
+        """Evaluar compliance con SLA"""
+        if not escalation_ticket:
+            return "unknown"
+
+        sla_info = escalation_ticket.get("sla_info", {})
+        if not sla_info:
+            return "unknown"
+
+        # Check if we're within SLA targets
+        response_due = sla_info.get("response_due")
+        if response_due:
+            try:
+                due_time = datetime.fromisoformat(response_due.replace('Z', '+00:00'))
+                if datetime.utcnow() <= due_time:
+                    return "compliant"
+                else:
+                    return "breach"
+            except:
+                return "unknown"
+
+        return "monitoring"
+
+    def _determine_follow_up_required(self, handoff_status: HandoffStatus) -> bool:
+        """Determinar si se requiere follow-up"""
+        return handoff_status in [HandoffStatus.PENDING, HandoffStatus.ASSIGNED]
+
+    def _create_handoff_timeline(self, routing_result: Optional[Dict],
+                               context_result: Optional[Dict],
+                               ticket_result: Optional[Dict],
+                               notification_result: Optional[Dict]) -> List[Dict[str, Any]]:
+        """Crear timeline del handoff"""
+        timeline = []
+        base_time = datetime.utcnow()
+
+        if routing_result:
+            timeline.append({
+                "timestamp": base_time.isoformat(),
+                "step": "specialist_routing",
+                "status": "completed" if routing_result.get("success") else "failed",
+                "details": f"Specialist assigned: {routing_result.get('specialist_assignment', {}).get('assigned_specialist', {}).get('name', 'Unknown')}"
+            })
+
+        if context_result:
+            timeline.append({
+                "timestamp": (base_time + timedelta(seconds=1)).isoformat(),
+                "step": "context_packaging",
+                "status": "completed" if context_result.get("success") else "failed",
+                "details": f"Context completeness: {context_result.get('package_completeness', 0):.1%}"
+            })
+
+        if ticket_result:
+            timeline.append({
+                "timestamp": (base_time + timedelta(seconds=2)).isoformat(),
+                "step": "ticket_creation",
+                "status": "completed" if ticket_result.get("success") else "failed",
+                "details": f"Ticket ID: {ticket_result.get('escalation_ticket', {}).get('ticket_id', 'Unknown')}"
+            })
+
+        if notification_result:
+            timeline.append({
+                "timestamp": (base_time + timedelta(seconds=3)).isoformat(),
+                "step": "stakeholder_notification",
+                "status": "completed" if notification_result.get("success") else "failed",
+                "details": f"Notifications sent: {notification_result.get('successful_notifications', 0)}"
+            })
+
+        return timeline
+
+    def _generate_handoff_warnings(self, routing_result: Optional[Dict],
+                                  context_result: Optional[Dict],
+                                  notification_result: Optional[Dict]) -> List[str]:
+        """Generar warnings sobre el handoff"""
+        warnings = []
+
+        # Routing warnings
+        if routing_result and routing_result.get("assignment_confidence", 1.0) < 0.7:
+            warnings.append("Low confidence in specialist assignment - manual review recommended")
+
+        # Context warnings
+        if context_result and context_result.get("package_completeness", 1.0) < 0.8:
+            warnings.append("Incomplete context package - some information may be missing")
+
+        # Notification warnings
+        if notification_result and notification_result.get("failed_notifications", 0) > 0:
+            failed_count = notification_result.get("failed_notifications", 0)
+            warnings.append(f"{failed_count} notification(s) failed to deliver")
+
+        return warnings
+
+    def execute_handoff(self, handoff_request: HandoffRequest,
+                       session_id: str = None) -> Dict[str, Any]:
+        """Ejecutar handoff humano completo"""
+        handoff_id = handoff_request.handoff_id
+
+        # Actualizar estado: PROCESSING
         state_manager.update_agent_state(
             self.agent_id,
             AgentStateStatus.PROCESSING,
             {
-                "current_task": "human_handoff_execution",
+                "current_task": "human_handoff",
                 "handoff_id": handoff_id,
                 "employee_id": handoff_request.employee_id,
-                "escalation_level": handoff_request.escalation_level.value,
+                "error_category": handoff_request.error_category,
+                "handoff_priority": handoff_request.handoff_priority.value,
                 "started_at": datetime.utcnow().isoformat()
             },
             session_id
         )
-        
+
+        # Registrar métricas iniciales
         observability_manager.log_agent_metrics(
             self.agent_id,
             {
-                "escalation_level": handoff_request.escalation_level.value,
-                "context_preservation_required": handoff_request.context_preservation_required,
-                "specialist_preferences": len(handoff_request.specialist_preferences),
-                "has_business_impact": handoff_request.business_impact is not None,
-                "has_urgency_reason": handoff_request.urgency_reason is not None
+                "handoff_priority": handoff_request.handoff_priority.value,
+                "error_category": handoff_request.error_category,
+                "error_severity": handoff_request.error_severity,
+                "source_agent": handoff_request.source_agent,
+                "requires_immediate_attention": handoff_request.requires_immediate_attention,
+                "escalation_level": handoff_request.escalation_level,
+                "recovery_attempts_count": len(handoff_request.recovery_attempts)
             },
             session_id
         )
-        
+
         try:
+            # Procesar con el método base
             result = self.process_request(handoff_request, session_id)
-            
+
+            # Si el handoff fue exitoso, actualizar State Management
             if result["success"]:
+                # Actualizar datos del empleado con resultados del handoff
                 if session_id:
                     handoff_data = {
                         "human_handoff_completed": True,
                         "handoff_id": handoff_id,
-                        "escalation_level": handoff_request.escalation_level.value,
-                        "specialists_assigned": result.get("handoff_summary", {}).get("specialists_assigned", 0),
-                        "tickets_created": result.get("handoff_summary", {}).get("tickets_created", 0),
-                        "context_preserved": result.get("handoff_summary", {}).get("context_preserved", False),
+                        "specialist_assigned": result.get("specialist_assigned", False),
+                        "context_preserved": result.get("context_preserved", False),
+                        "escalation_ticket_id": result.get("escalation_ticket", {}).get("ticket_id") if result.get("escalation_ticket") else None,
+                        "notifications_sent": result.get("successful_notifications", 0),
+                        "handoff_quality_score": result.get("handoff_quality_score", 0.0),
                         "handoff_timestamp": datetime.utcnow().isoformat()
                     }
-                    state_manager.update_employee_data(session_id, handoff_data, "processed")
-                
+
+                    # Actualizar phase a error_handling si hay escalación activa
+                    if result.get("specialist_assigned"):
+                        phase_update = "error_handling"
+                    else:
+                        phase_update = None
+
+                    state_manager.update_employee_data(
+                        session_id,
+                        handoff_data,
+                        phase_update or "escalated"
+                    )
+
+                # Actualizar estado: COMPLETED
                 state_manager.update_agent_state(
                     self.agent_id,
                     AgentStateStatus.COMPLETED,
                     {
                         "current_task": "completed",
                         "handoff_id": handoff_id,
-                        "escalation_successful": True,
-                        "specialists_notified": result.get("handoff_summary", {}).get("specialists_assigned", 0),
+                        "handoff_status": result.get("handoff_status"),
+                        "specialist_assigned": result.get("specialist_assigned", False),
+                        "context_preserved": result.get("context_preserved", False),
+                        "notifications_sent": result.get("successful_notifications", 0),
                         "completed_at": datetime.utcnow().isoformat()
                     },
                     session_id
                 )
-                
-                self.active_handoffs[handoff_id] = {
+
+                # Almacenar en historial de handoffs
+                self.handoff_history[handoff_id] = {
                     "status": "completed",
                     "result": result,
                     "completed_at": datetime.utcnow()
                 }
+
+                # Actualizar métricas globales
+                self.handoff_metrics["total_handoffs"] += 1
+                if result.get("specialist_assigned"):
+                    self.handoff_metrics["successful_handoffs"] += 1
+                else:
+                    self.handoff_metrics["failed_handoffs"] += 1
+
+                # Actualizar tiempo promedio
+                total_time = (self.handoff_metrics["average_resolution_time"] * 
+                             (self.handoff_metrics["total_handoffs"] - 1) + 
+                             result.get("processing_time", 0))
+                self.handoff_metrics["average_resolution_time"] = total_time / self.handoff_metrics["total_handoffs"]
+
+                # Actualizar rate de preservación de contexto
+                context_score = result.get("context_preservation_score", 0.0)
+                current_rate = self.handoff_metrics["context_preservation_rate"]
+                total_handoffs = self.handoff_metrics["total_handoffs"]
+                self.handoff_metrics["context_preservation_rate"] = (
+                    (current_rate * (total_handoffs - 1) + context_score) / total_handoffs
+                )
+
             else:
+                # Error en handoff
                 state_manager.update_agent_state(
                     self.agent_id,
                     AgentStateStatus.ERROR,
@@ -430,13 +808,23 @@ Ejecuta handoff completo con preservación de contexto y notificación multi-can
                     },
                     session_id
                 )
-            
-            result["handoff_id"] = handoff_id
-            result["session_id"] = session_id
+
+                # Actualizar métricas de fallo
+                self.handoff_metrics["total_handoffs"] += 1
+                self.handoff_metrics["failed_handoffs"] += 1
+
+            # Agregar información de sesión al resultado
+            result.update({
+                "handoff_id": handoff_id,
+                "session_id": session_id,
+                "handoff_metrics_updated": self.handoff_metrics
+            })
+
             return result
-            
+
         except Exception as e:
-            error_msg = f"Error ejecutando escalación humana: {str(e)}"
+            # Error durante handoff
+            error_msg = f"Error ejecutando handoff humano: {str(e)}"
             state_manager.update_agent_state(
                 self.agent_id,
                 AgentStateStatus.ERROR,
@@ -448,7 +836,7 @@ Ejecuta handoff completo con preservación de contexto y notificación multi-can
                 },
                 session_id
             )
-            
+
             self.logger.error(error_msg)
             return {
                 "success": False,
@@ -458,237 +846,201 @@ Ejecuta handoff completo con preservación de contexto y notificación multi-can
                 "session_id": session_id,
                 "agent_id": self.agent_id,
                 "processing_time": 0,
-                "handoff_status": HandoffStatus.FAILED.value
+                "handoff_status": HandoffStatus.CANCELLED.value,
+                "requires_manual_escalation": True
             }
-    
+
     def _process_with_tools_directly(self, input_data: Any) -> Dict[str, Any]:
-        """Procesar usando herramientas directamente con flujo de escalación"""
+        """Procesar usando herramientas directamente con flujo específico de handoff"""
         results = []
         formatted_input = self._format_input(input_data)
-        
-        self.logger.info(f"Procesando escalación humana con {len(self.tools)} herramientas especializadas")
-        
+        self.logger.info(f"Procesando handoff con {len(self.tools)} herramientas especializadas")
+
+        # Variables para almacenar resultados
         routing_result = None
-        context_package = None
+        context_result = None
         ticket_result = None
         notification_result = None
-        
+
+        # Preparar datos según el tipo de entrada
         if isinstance(input_data, HandoffRequest):
-            session_id = input_data.session_id
-            employee_id = input_data.employee_id
-            escalation_level = input_data.escalation_level.value
-            error_classification = input_data.error_classification
-            recovery_attempts = input_data.recovery_attempts
+            handoff_request = input_data
+            session_id = handoff_request.session_id
+            handoff_data = handoff_request.dict()
         else:
-            session_id = input_data.get("session_id", "") if isinstance(input_data, dict) else ""
-            employee_id = input_data.get("employee_id", "unknown") if isinstance(input_data, dict) else "unknown"
-            escalation_level = input_data.get("escalation_level", "medium") if isinstance(input_data, dict) else "medium"
-            error_classification = input_data.get("error_classification", {}) if isinstance(input_data, dict) else {}
-            recovery_attempts = input_data.get("recovery_attempts", {}) if isinstance(input_data, dict) else {}
-        
+            # Fallback para datos genéricos
+            handoff_request = input_data if isinstance(input_data, dict) else {}
+            session_id = handoff_request.get("session_id", "") if isinstance(handoff_request, dict) else ""
+            handoff_data = handoff_request
+
+        # 1. Ejecutar Escalation Router (siempre primero)
         try:
             self.logger.info("Ejecutando escalation_router_tool")
             routing_result = escalation_router_tool.invoke({
-                "error_classification": error_classification,
-                "escalation_level": escalation_level,
-                "session_id": session_id
+                "handoff_request": handoff_data,
+                "available_specialists": None  # Tool will use defaults
             })
             results.append(("escalation_router_tool", routing_result))
-            self.logger.info("✅ Escalation router completado")
+            self.logger.info("✅ Specialist routing completado")
         except Exception as e:
             error_msg = f"Error: {str(e)}"
             self.logger.warning(f"❌ Error con escalation_router_tool: {e}")
             results.append(("escalation_router_tool", {"success": False, "error": error_msg}))
-        
+
+        # 2. Ejecutar Context Packager (siempre ejecutar para preservar contexto)
         try:
             self.logger.info("Ejecutando context_packager_tool")
-            context_package = context_packager_tool.invoke({
-                "session_id": session_id,
-                "error_classification": error_classification,
-                "recovery_attempts": recovery_attempts
+            context_result = context_packager_tool.invoke({
+                "handoff_request": handoff_data,
+                "system_data": None  # Tool will gather system data
             })
-            results.append(("context_packager_tool", context_package))
-            self.logger.info("✅ Context packager completado")
+            results.append(("context_packager_tool", context_result))
+            self.logger.info("✅ Context packaging completado")
         except Exception as e:
             error_msg = f"Error: {str(e)}"
             self.logger.warning(f"❌ Error con context_packager_tool: {e}")
             results.append(("context_packager_tool", {"success": False, "error": error_msg}))
-        
-        if routing_result and routing_result.get("success") and context_package and context_package.get("success"):
+
+        # 3. Ejecutar Ticket Manager (si hay routing y contexto)
+        if ((routing_result and routing_result.get("success")) or
+            (context_result and context_result.get("success"))):
             try:
                 self.logger.info("Ejecutando ticket_manager_tool")
-                escalation_request = {
-                    "session_id": session_id,
-                    "employee_id": employee_id,
-                    "escalation_level": escalation_level
-                }
-                specialist_assignments = routing_result.get("routing_result", {}).get("specialist_assignments", [])
-                context_pkg = context_package.get("context_package", {})
                 
+                # Preparar datos para ticket creation
+                specialist_assignment = None
+                if routing_result and routing_result.get("success"):
+                    specialist_assignment = routing_result.get("specialist_assignment")
+                
+                context_package = None
+                if context_result and context_result.get("success"):
+                    context_package = context_result.get("context_package")
+
                 ticket_result = ticket_manager_tool.invoke({
-                    "escalation_request": escalation_request,
-                    "specialist_assignments": specialist_assignments,
-                    "context_package": context_pkg
+                    "handoff_request": handoff_data,
+                    "specialist_assignment": specialist_assignment,
+                    "context_package": context_package
                 })
                 results.append(("ticket_manager_tool", ticket_result))
-                self.logger.info("✅ Ticket manager completado")
+                self.logger.info("✅ Ticket management completado")
             except Exception as e:
                 error_msg = f"Error: {str(e)}"
                 self.logger.warning(f"❌ Error con ticket_manager_tool: {e}")
                 results.append(("ticket_manager_tool", {"success": False, "error": error_msg}))
+
+        # 4. Ejecutar Notification System (siempre al final)
+        try:
+            self.logger.info("Ejecutando notification_system_tool")
             
+            # Preparar datos para notificaciones
+            specialist_assignment = None
+            if routing_result and routing_result.get("success"):
+                specialist_assignment = routing_result.get("specialist_assignment")
+            
+            escalation_ticket = None
             if ticket_result and ticket_result.get("success"):
-                try:
-                    self.logger.info("Ejecutando notification_system_tool")
-                    tickets_created = ticket_result.get("ticket_management_result", {}).get("tickets_created", [])
-                    specialist_assignments = routing_result.get("routing_result", {}).get("specialist_assignments", [])
-                    
-                    notification_result = notification_system_tool.invoke({
-                        "tickets_created": tickets_created,
-                        "specialist_assignments": specialist_assignments,
-                        "escalation_level": escalation_level
-                    })
-                    results.append(("notification_system_tool", notification_result))
-                    self.logger.info("✅ Notification system completado")
-                except Exception as e:
-                    error_msg = f"Error: {str(e)}"
-                    self.logger.warning(f"❌ Error con notification_system_tool: {e}")
-                    results.append(("notification_system_tool", {"success": False, "error": error_msg}))
-        
+                escalation_ticket = ticket_result.get("escalation_ticket")
+
+            notification_result = notification_system_tool.invoke({
+                "handoff_request": handoff_data,
+                "specialist_assignment": specialist_assignment,
+                "escalation_ticket": escalation_ticket
+            })
+            results.append(("notification_system_tool", notification_result))
+            self.logger.info("✅ Notification system completado")
+        except Exception as e:
+            error_msg = f"Error: {str(e)}"
+            self.logger.warning(f"❌ Error con notification_system_tool: {e}")
+            results.append(("notification_system_tool", {"success": False, "error": error_msg}))
+
+        # Evaluar éxito general
         successful_tools = len([r for r in results if isinstance(r, tuple) and isinstance(r[1], dict) and r[1].get("success")])
-        overall_success = successful_tools >= 3
-        
+        overall_success = successful_tools >= 2  # Al menos routing/context + notifications
+
         return {
-            "output": "Procesamiento de escalación humana completado",
+            "output": "Handoff humano completado",
             "intermediate_steps": results,
             "routing_result": routing_result,
-            "context_package": context_package,
+            "context_result": context_result,
             "ticket_result": ticket_result,
             "notification_result": notification_result,
             "successful_tools": successful_tools,
             "overall_success": overall_success,
             "tools_executed": len(results)
         }
-    
-    def _generate_handoff_warnings(self, routing_result: Dict, context_package: Dict,
-                                  ticket_result: Dict, notification_result: Dict) -> List[str]:
-        """Generar advertencias basadas en resultados"""
-        warnings = []
-        
-        if routing_result and not routing_result.get("success"):
-            warnings.append("Routing de especialistas falló - asignación manual requerida")
-        
-        if context_package and not context_package.get("success"):
-            warnings.append("Empaquetado de contexto falló - información puede estar incompleta")
-        
-        if ticket_result and not ticket_result.get("success"):
-            warnings.append("Creación de tickets falló - tracking manual requerido")
-        
-        if notification_result:
-            failures = notification_result.get("notification_result", {}).get("notification_failures", [])
-            if failures:
-                warnings.append(f"{len(failures)} notificaciones fallaron - verificar recepción manual")
-        
-        if context_package and context_package.get("success"):
-            completeness = context_package.get("package_metadata", {}).get("context_completeness", 100)
-            if completeness < 90:
-                warnings.append(f"Contexto incompleto ({completeness}%) - información crítica puede faltar")
-        
-        return warnings
-    
-    def _load_specialist_directory(self) -> Dict[str, List[Dict[str, str]]]:
-        """Cargar directorio de especialistas"""
-        return {
-            "it_specialists": [
-                {"name": "Carlos IT Manager", "contact": "carlos.it@empresa.com", "availability": "24/7"}
-            ],
-            "hr_managers": [
-                {"name": "María HR Director", "contact": "maria.hr@empresa.com", "availability": "business_hours"}
-            ],
-            "security_analysts": [
-                {"name": "Sofia Security", "contact": "sofia.security@empresa.com", "availability": "24/7"}
-            ]
-        }
-    
-    def _load_escalation_rules(self) -> Dict[str, Any]:
-        """Cargar reglas de escalación"""
-        return {
-            "sla_thresholds": {
-                "emergency": 5,
-                "critical": 15,
-                "high": 60,
-                "medium": 240,
-                "low": 1440
-            },
-            "notification_channels": {
-                "emergency": ["phone", "sms", "slack", "email"],
-                "critical": ["sms", "slack", "email"],
-                "high": ["slack", "email"],
-                "medium": ["email", "dashboard"],
-                "low": ["email"]
-            }
-        }
-    
+
+    # Métodos auxiliares para el agente
     def get_handoff_status(self, handoff_id: str) -> Dict[str, Any]:
         """Obtener estado de un handoff específico"""
         try:
-            if handoff_id in self.active_handoffs:
+            if handoff_id in self.handoff_history:
                 return {
                     "found": True,
                     "handoff_id": handoff_id,
+                    **self.handoff_history[handoff_id]
+                }
+            elif handoff_id in self.active_handoffs:
+                return {
+                    "found": True,
+                    "handoff_id": handoff_id,
+                    "status": "active",
                     **self.active_handoffs[handoff_id]
                 }
             else:
                 return {
                     "found": False,
                     "handoff_id": handoff_id,
-                    "message": "Handoff no encontrado en registros activos"
+                    "message": "Handoff not found in records"
                 }
         except Exception as e:
             return {"found": False, "error": str(e)}
-    
-    def get_escalation_metrics(self, session_id: str = None) -> Dict[str, Any]:
-        """Obtener métricas de escalación"""
+
+    def get_handoff_metrics(self) -> Dict[str, Any]:
+        """Obtener métricas de handoff"""
+        return {
+            "handoff_metrics": self.handoff_metrics.copy(),
+            "active_handoffs": len(self.active_handoffs),
+            "handoff_history_count": len(self.handoff_history),
+            "success_rate": (
+                self.handoff_metrics["successful_handoffs"] / 
+                max(1, self.handoff_metrics["total_handoffs"])
+            ),
+            "average_resolution_time_seconds": self.handoff_metrics["average_resolution_time"],
+            "context_preservation_rate": self.handoff_metrics["context_preservation_rate"]
+        }
+
+    def validate_handoff_configuration(self) -> Dict[str, Any]:
+        """Validar configuración de handoff"""
         try:
-            total_handoffs = len(self.active_handoffs)
-            successful_handoffs = len([h for h in self.active_handoffs.values() if h["status"] == "completed"])
-            
+            validation_issues = []
+
+            # Verificar herramientas disponibles
+            expected_tools = ["escalation_router_tool", "context_packager_tool", "ticket_manager_tool", "notification_system_tool"]
+            available_tools = [tool.name for tool in self.tools]
+
+            for expected_tool in expected_tools:
+                if expected_tool not in available_tools:
+                    validation_issues.append(f"Missing handoff tool: {expected_tool}")
+
+            # Verificar integración con State Management
+            try:
+                agent_state = state_manager.get_agent_state(self.agent_id)
+                if not agent_state:
+                    validation_issues.append("Agent not registered in State Management")
+            except Exception as e:
+                validation_issues.append(f"State Management integration issue: {e}")
+
             return {
-                "handoff_metrics": {
-                    "total_handoffs": total_handoffs,
-                    "successful_handoffs": successful_handoffs,
-                    "success_rate": (successful_handoffs / total_handoffs * 100) if total_handoffs > 0 else 0,
-                    "active_handoffs": total_handoffs - successful_handoffs
-                },
-                "specialist_utilization": self._calculate_specialist_utilization(),
-                "response_time_metrics": self._calculate_response_metrics(),
-                "escalation_trends": self._analyze_escalation_trends()
+                "configuration_valid": len(validation_issues) == 0,
+                "validation_issues": validation_issues,
+                "tools_available": len(available_tools),
+                "expected_tools": len(expected_tools),
+                "handoff_ready": len(validation_issues) == 0
             }
+
         except Exception as e:
-            return {"error": str(e), "metrics_available": False}
-    
-    def _calculate_specialist_utilization(self) -> Dict[str, Any]:
-        """Calcular utilización de especialistas"""
-        return {
-            "it_specialists": {"active_cases": 2, "capacity": 10},
-            "hr_managers": {"active_cases": 1, "capacity": 5},
-            "security_analysts": {"active_cases": 0, "capacity": 3}
-        }
-    
-    def _calculate_response_metrics(self) -> Dict[str, Any]:
-        """Calcular métricas de respuesta"""
-        return {
-            "average_routing_time": 2.5,
-            "average_notification_time": 1.2,
-            "sla_compliance_rate": 94.5,
-            "escalation_effectiveness": 87.3
-        }
-    
-    def _analyze_escalation_trends(self) -> Dict[str, Any]:
-        """Analizar tendencias de escalación"""
-        return {
-            "most_common_category": "agent_failure",
-            "peak_escalation_hours": ["09:00-11:00", "14:00-16:00"],
-            "resolution_time_trend": "improving",
-            "specialist_satisfaction": 4.2
-        }
+            return {
+                "configuration_valid": False,
+                "error": str(e),
+                "handoff_ready": False
+            }
