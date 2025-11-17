@@ -14,3 +14,4 @@ loguru>=0.7.0
 redis>=4.0.0
 filelock>=3.0.0
 msgpack>=1.0.0
+langfuse>=2.50.0,<3.0.0

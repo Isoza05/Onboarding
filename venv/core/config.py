@@ -27,11 +27,11 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     log_file: str = Field(default="logs/onboarding_system.log", env="LOG_FILE")
     
-    # LangFuse Configuration
+    # Langfuse Configuration
     langfuse_secret_key: str = Field(default="", env="LANGFUSE_SECRET_KEY")
     langfuse_public_key: str = Field(default="", env="LANGFUSE_PUBLIC_KEY")
-    langfuse_host: str = Field(default="https://cloud.langfuse.com", env="LANGFUSE_HOST")
-    langfuse_enabled: bool = Field(default=False, env="LANGFUSE_ENABLED")
+    langfuse_base_url: str = Field(default="https://us.cloud.langfuse.com", env="LANGFUSE_BASE_URL")
+    langfuse_enabled: bool = Field(default=True, env="LANGFUSE_ENABLED")
     
     class Config:
         env_file = ".env"
