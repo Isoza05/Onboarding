@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date, timezone  # ← AGREGAR timezone
+
 import threading
 import json
 import os
@@ -11,6 +12,10 @@ from core.state_management.models import (
 )
 from core.logging_config import get_audit_logger
 from core.config import settings
+
+# Agregar helper al inicio:
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 class CommonStateManager:
     """
@@ -58,11 +63,11 @@ class CommonStateManager:
                     agent_id=agent_id,
                     status=AgentStateStatus.IDLE,
                     data=initial_data or {},
-                    last_updated=datetime.utcnow()
+                    last_updated=utc_now()
                 )
                 
                 self._system_state.agent_registry[agent_id] = agent_state
-                self._system_state.last_updated = datetime.utcnow()
+                self._system_state.last_updated = utc_now()
                 
                 self._persist_state()
                 self._notify_callbacks("state_change", {
@@ -85,20 +90,20 @@ class CommonStateManager:
                 # Si no se proporciona session_id, EmployeeContext lo generará automáticamente
                 if session_id is None:
                     context = EmployeeContext(
-                        employee_id=employee_data.get("employee_id", f"emp_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"),
+                        employee_id=employee_data.get("employee_id", f"emp_{utc_now().strftime('%Y%m%d_%H%M%S')}"),
                         raw_data=employee_data,
                         phase=OnboardingPhase.INITIATED
                     )
                 else:
                     context = EmployeeContext(
-                        employee_id=employee_data.get("employee_id", f"emp_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"),
+                        employee_id=employee_data.get("employee_id", f"emp_{utc_now().strftime('%Y%m%d_%H%M%S')}"),
                         session_id=session_id,
                         raw_data=employee_data,
                         phase=OnboardingPhase.INITIATED
                     )
                 
                 self._system_state.active_sessions[context.session_id] = context
-                self._system_state.last_updated = datetime.utcnow()
+                self._system_state.last_updated = utc_now()
                 
                 self._persist_state()
                 self._notify_callbacks("data_update", {
@@ -123,7 +128,7 @@ class CommonStateManager:
                 if agent_id in self._system_state.agent_registry:
                     agent_state = self._system_state.agent_registry[agent_id]
                     agent_state.status = status
-                    agent_state.last_updated = datetime.utcnow()
+                    agent_state.last_updated = utc_now()
                     
                     if data:
                         agent_state.data.update(data)
@@ -139,14 +144,14 @@ class CommonStateManager:
                         )
                     else:
                         context.agent_states[agent_id].status = status
-                        context.agent_states[agent_id].last_updated = datetime.utcnow()
+                        context.agent_states[agent_id].last_updated = utc_now()
                     
                     if data:
                         context.agent_states[agent_id].data.update(data)
                     
-                    context.updated_at = datetime.utcnow()
+                    context.updated_at = utc_now()
                 
-                self._system_state.last_updated = datetime.utcnow()
+                self._system_state.last_updated = utc_now()
                 self._persist_state()
                 
                 self._notify_callbacks("state_change", {
@@ -207,8 +212,8 @@ class CommonStateManager:
                 elif data_type == "raw":
                     context.raw_data.update(data)
                 
-                context.updated_at = datetime.utcnow()
-                self._system_state.last_updated = datetime.utcnow()
+                context.updated_at = utc_now()
+                self._system_state.last_updated = utc_now()
                 
                 self._persist_state()
                 self._notify_callbacks("data_update", {
@@ -282,6 +287,8 @@ class CommonStateManager:
                 
                 if isinstance(obj, datetime):
                     return obj.isoformat()
+                elif isinstance(obj, date):  # ← NUEVA LÍNEA
+                    return obj.isoformat()    # ← NUEVA LÍNEA
                 elif isinstance(obj, dict):
                     seen.add(obj_id)
                     result = {}

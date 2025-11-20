@@ -310,7 +310,11 @@ Ejecuta consolidación, validación cruzada y evaluación de calidad completa.
                 ready_for_contract = readiness_assessment.get("ready_for_contract_management", False) if readiness_assessment else False
                 ready_for_meeting = readiness_assessment.get("ready_for_meeting_coordination", False) if readiness_assessment else False
                 
-                overall_readiness = ready_for_it and ready_for_contract and ready_for_meeting
+                # ✅ CAMBIAR LÓGICA: Si quality score >= 50%, permitir Sequential Pipeline
+                overall_readiness = (
+                    (ready_for_it and ready_for_contract and ready_for_meeting) or  # Ideal case
+                    (overall_quality_score >= 50.0 and consistency_score >= 85.0)   # Acceptable case
+                )
                 
                 # Identificar issues críticos
                 critical_issues = []
@@ -456,19 +460,16 @@ Ejecuta consolidación, validación cruzada y evaluación de calidad completa.
             if result["success"]:
                 # Actualizar datos del empleado
                 if session_id:
+                    aggregation_id_for_tracking = aggregation_id  # ← USAR aggregation_id
                     tracking_data = {
-                        "progress_tracking_completed": True,
-                        "tracker_id": tracker_id,
-                        "pipeline_health_score": result.get("pipeline_health_score", 0),
-                        "completion_confidence": result.get("completion_confidence", 0),
-                        "pipeline_blocked": result.get("pipeline_blocked", False),
-                        "escalation_required": result.get("escalation_required", False),
-                        "estimated_completion": result.get("estimated_time_remaining_minutes", 0),
-                        "monitoring_timestamp": datetime.utcnow().isoformat(),
-                        "stages_monitored": result.get("stages_monitored", 0),
-                        "quality_gates_evaluated": result.get("quality_gates_evaluated", 0),
-                        "sla_breaches_detected": result.get("sla_breaches_detected", 0),
-                        "escalations_triggered": result.get("escalations_triggered", 0)
+                        "aggregation_completed": True,
+                        "aggregation_id": aggregation_id_for_tracking,
+                        "overall_quality_score": result.get("overall_quality_score", 0),
+                         "validation_passed": result.get("validation_passed", False),
+                        "ready_for_sequential_pipeline": result.get("ready_for_sequential_pipeline", False),
+                        "aggregation_timestamp": datetime.utcnow().isoformat(),
+                        "data_completeness": result.get("completeness_score", 0),
+                        "consistency_score": result.get("consistency_score", 0)
                     }
                     
                     try:
@@ -487,19 +488,17 @@ Ejecuta consolidación, validación cruzada y evaluación de calidad completa.
                     AgentStateStatus.COMPLETED,
                     {
                         "current_task": "completed",
-                        "tracker_id": tracker_id,
-                        "pipeline_health_score": result.get("pipeline_health_score", 0),
-                        "stages_monitored": result.get("stages_monitored", 0),
-                        "quality_gates_evaluated": result.get("quality_gates_evaluated", 0),
-                        "escalations_triggered": result.get("escalations_triggered", 0),
-                        "tracking_status": result.get("tracking_status", "completed"),
+                        "aggregation_id": aggregation_id,  # ← USAR aggregation_id
+                        "overall_quality_score": result.get("overall_quality_score", 0),
+                        "validation_passed": result.get("validation_passed", False),
+                        "ready_for_sequential_pipeline": result.get("ready_for_sequential_pipeline", False),
                         "completed_at": datetime.utcnow().isoformat()
                     },
                     session_id
                 )
                 
                 # Registrar en sesiones activas
-                self.active_monitoring_sessions[tracker_id] = {
+                self.active_aggregations[aggregation_id] = {  # ← USAR aggregation_id
                     "status": "completed",
                     "result": result,
                     "completed_at": datetime.utcnow()

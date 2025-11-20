@@ -1,9 +1,19 @@
 from typing import Dict, Any, List, Optional
 from langchain_core.prompts import ChatPromptTemplate
 from agents.base.base_agent import BaseAgent
-from datetime import datetime
+from datetime import datetime, timezone 
 import json
 import asyncio
+from loguru import logger
+
+# Agregar helper después de los imports:
+def utc_now() -> datetime:
+    """Obtener datetime UTC timezone-aware"""
+    return datetime.now(timezone.utc)
+
+def utc_now_iso() -> str:
+    """Obtener datetime UTC como string ISO"""
+    return utc_now().isoformat()
 
 # Imports de orchestrator
 from .tools import (
@@ -24,6 +34,7 @@ from core.state_management.state_manager import state_manager
 from core.state_management.models import AgentStateStatus, OnboardingPhase
 from core.observability import observability_manager
 from core.database import db_manager
+from shared.models import Priority
 
 class OrchestratorAgent(BaseAgent):
     """
@@ -352,7 +363,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
         """Orquestar proceso completo de onboarding usando LangGraph workflows"""
         
         # Generar orchestration_id si no existe
-        orchestration_id = f"orch_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{orchestration_request.employee_id}"
+        orchestration_id = f"orch_{utc_now().strftime('%Y%m%d_%H%M%S')}_{orchestration_request.employee_id}"
         
         # Actualizar estado del orchestrator: PROCESSING
         state_manager.update_agent_state(
@@ -364,7 +375,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                 "employee_id": orchestration_request.employee_id,
                 "pattern": orchestration_request.orchestration_pattern.value,
                 "required_agents": [agent.value for agent in orchestration_request.required_agents],
-                "started_at": datetime.utcnow().isoformat()
+                "started_at": utc_now_iso()
             },
             session_id
         )
@@ -432,7 +443,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                         "agents_coordinated": len(workflow_result.get("agent_results", {})),
                         "overall_success": workflow_result.get("success", False),
                         "quality_score": workflow_result.get("processing_summary", {}).get("overall_quality_score", 0),
-                        "completed_at": datetime.utcnow().isoformat()
+                        "completed_at": utc_now_iso()
                     },
                     session_id
                 )
@@ -441,7 +452,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                 self.active_orchestrations[orchestration_id] = {
                     "status": "completed",
                     "result": workflow_result,
-                    "completed_at": datetime.utcnow()
+                    "completed_at": utc_now()
                 }
 
             else:
@@ -453,7 +464,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                         "current_task": "error",
                         "orchestration_id": orchestration_id,
                         "errors": workflow_result.get("errors", []),
-                        "failed_at": datetime.utcnow().isoformat()
+                        "failed_at": utc_now_iso()
                     },
                     session_id
                 )
@@ -463,7 +474,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                 **workflow_result,
                 "session_id": session_id,
                 "orchestrator_agent_id": self.agent_id,
-                "orchestration_timestamp": datetime.utcnow().isoformat()
+                "orchestration_timestamp": utc_now_iso()
             }
 
             return result
@@ -479,7 +490,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                     "current_task": "error",
                     "orchestration_id": orchestration_id,
                     "error_message": error_msg,
-                    "failed_at": datetime.utcnow().isoformat()
+                    "failed_at": utc_now_iso()
                 },
                 session_id
             )
@@ -551,7 +562,7 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                         result = tool.invoke({
                             "orchestration_state": {
                                 "session_id": "test_session",
-                                "started_at": datetime.utcnow().isoformat(),
+                                "started_at": utc_now_iso(),
                                 "current_phase": "data_collection_concurrent"
                             },
                             "monitoring_criteria": {},
@@ -645,6 +656,118 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
                 "workflow_status": {"workflow_available": False}
             }
 
+    @observability_manager.trace_agent_execution("orchestrator_agent")
+    async def execute_sequential_pipeline(self, sequential_request_data: Dict[str, Any], session_id: str = None) -> Dict[str, Any]:
+        """Ejecutar Sequential Pipeline después del Data Aggregation"""
+        try:
+            logger.info(f"Iniciando Sequential Pipeline para empleado: {sequential_request_data['employee_id']}")
+            
+            # Importar la función de Sequential Pipeline
+            from .workflows import execute_sequential_pipeline_orchestration, SequentialPipelineRequest
+            
+            # Crear request estructurado
+            pipeline_request = SequentialPipelineRequest(
+                employee_id=sequential_request_data["employee_id"],
+                session_id=sequential_request_data["session_id"],
+                orchestration_id=sequential_request_data["orchestration_id"],
+                consolidated_data=sequential_request_data["consolidated_data"],
+                aggregation_result=sequential_request_data["aggregation_result"],
+                data_quality_score=sequential_request_data["data_quality_score"],
+                pipeline_priority=Priority.HIGH,
+                quality_gates_enabled=True,
+                sla_monitoring_enabled=True,
+                auto_escalation_enabled=True
+            )
+            
+            # Actualizar estado: PROCESSING Sequential Pipeline
+            state_manager.update_agent_state(
+                self.agent_id,
+                AgentStateStatus.PROCESSING,
+                {
+                    "current_task": "sequential_pipeline_orchestration",
+                    "pipeline_request": pipeline_request.model_dump(),
+                    "started_at": utc_now_iso()
+                },
+                session_id
+            )
+            
+            # Ejecutar Sequential Pipeline
+            pipeline_result = await execute_sequential_pipeline_orchestration(pipeline_request)
+            
+            # Procesar resultado
+            if pipeline_result.get("success", False):
+                # Actualizar State Management
+                if session_id:
+                    state_manager.update_employee_data(
+                        session_id,
+                        {
+                            "sequential_pipeline_completed": True,
+                            "pipeline_result": pipeline_result,
+                            "employee_ready_for_onboarding": pipeline_result.get("employee_ready_for_onboarding", False),
+                            "onboarding_timeline": pipeline_result.get("onboarding_timeline"),
+                            "next_phase": "onboarding_execution"
+                        },
+                        "ready_for_onboarding" if pipeline_result.get("employee_ready_for_onboarding") else "needs_review"
+                    )
+                
+                # Actualizar estado: COMPLETED
+                state_manager.update_agent_state(
+                    self.agent_id,
+                    AgentStateStatus.COMPLETED,
+                    {
+                        "current_task": "completed_full_orchestration",
+                        "pipeline_success": True,
+                        "employee_ready": pipeline_result.get("employee_ready_for_onboarding", False),
+                        "stages_completed": pipeline_result.get("stages_completed", 0),
+                        "overall_quality": pipeline_result.get("overall_quality_score", 0),
+                        "completed_at": utc_now_iso()
+                    },
+                    session_id
+                )
+                
+                logger.info("✅ Sequential Pipeline completado exitosamente")
+            else:
+                # Error en pipeline
+                state_manager.update_agent_state(
+                    self.agent_id,
+                    AgentStateStatus.ERROR,
+                    {
+                        "current_task": "sequential_pipeline_error",
+                        "pipeline_errors": pipeline_result.get("errors", []),
+                        "failed_at": utc_now_iso()
+                    },
+                    session_id
+                )
+                
+                logger.error("❌ Sequential Pipeline falló")
+            
+            return pipeline_result
+            
+        except Exception as e:
+            error_msg = f"Error ejecutando Sequential Pipeline: {str(e)}"
+            logger.error(error_msg)
+            
+            # Error durante ejecución
+            state_manager.update_agent_state(
+                self.agent_id,
+                AgentStateStatus.ERROR,
+                {
+                    "current_task": "sequential_pipeline_critical_error",
+                    "error_message": error_msg,
+                    "failed_at": utc_now_iso()
+                },
+                session_id
+            )
+            
+            return {
+                "success": False,
+                "error": error_msg,
+                "employee_id": sequential_request_data.get("employee_id", "unknown"),
+                "session_id": session_id,
+                "pipeline_completed": False,
+                "requires_manual_intervention": True
+            }
+
     async def test_full_integration(self) -> Dict[str, Any]:
         """Test completo de integración del orchestrator"""
         try:
@@ -673,4 +796,107 @@ Ejecuta orquestación completa coordinando todos los agentes necesarios.
             return {
                 "orchestrator_integration": "failed",
                 "error": str(e)
+            }
+    async def execute_complete_onboarding_orchestration(self, orchestration_request: OrchestrationRequest, session_id: str = None) -> Dict[str, Any]:
+        """Ejecutar orquestación completa: Data Collection → Aggregation → Sequential Pipeline"""
+        try:
+            logger.info(f"🚀 Iniciando orquestación completa para empleado: {orchestration_request.employee_id}")
+            
+            # FASE 1: Data Collection + Aggregation
+            data_collection_result = await self.orchestrate_onboarding_process(orchestration_request, session_id)
+            
+            if not data_collection_result.get("success", False):
+                logger.error("❌ Data Collection falló - no se puede continuar")
+                return data_collection_result
+            
+            # ✅ ARREGLAR: Obtener session_id de múltiples fuentes
+            session_id_final = (
+                data_collection_result.get("session_id") or 
+                session_id or 
+                f"session_{utc_now().strftime('%Y%m%d_%H%M%S')}_{orchestration_request.employee_id}"
+            )
+            
+            logger.info(f"🔍 Session ID final determinado: {session_id_final}")
+            
+            # ✅ VERIFICAR SI HAY SEQUENTIAL PIPELINE REQUEST LISTO
+            session_context = state_manager.get_employee_context(session_id_final) if session_id_final else None
+            sequential_request = None
+            
+            if session_context and session_context.processed_data:
+                sequential_request = session_context.processed_data.get("sequential_pipeline_request")
+            
+            # ✅ CAMBIAR LÓGICA: Si hay aggregation_result exitoso, SIEMPRE ejecutar Sequential Pipeline
+            aggregation_result = data_collection_result.get("aggregation_result", {})
+            
+            if not sequential_request and aggregation_result and aggregation_result.get("success"):
+                # ✅ ASEGURAR QUE session_id NUNCA SEA NONE
+                sequential_request = {
+                    "employee_id": orchestration_request.employee_id,
+                    "session_id": session_id_final,  # ✅ USAR session_id_final VALIDADO
+                    "orchestration_id": data_collection_result.get("orchestration_id"),
+                    "consolidated_data": data_collection_result.get("consolidated_data", {}),
+                    "aggregation_result": aggregation_result,
+                    "data_quality_score": aggregation_result.get("overall_quality_score", 0.0)
+                }
+                logger.info("✅ Sequential request creado desde aggregation_result")
+            
+            if not sequential_request:
+                logger.info("✅ Data Collection completado - Sequential Pipeline no requerido")
+                return {
+                    **data_collection_result,
+                    "sequential_pipeline_executed": False,
+                    "complete_orchestration_success": data_collection_result.get("success", False),
+                    "employee_ready_for_onboarding": False,
+                    "session_id": session_id_final,  # ✅ ASEGURAR SESSION_ID
+                    "final_next_actions": [
+                        "✅ Data Collection completado",
+                        "⚠️ Sequential Pipeline no ejecutado - verificar agregación", 
+                        "📋 Revisar calidad de datos para continuar"
+                    ]
+                }
+            
+            # ✅ VALIDAR session_id antes de crear SequentialPipelineRequest
+            if not sequential_request.get("session_id"):
+                sequential_request["session_id"] = session_id_final
+                
+            # FASE 2: Sequential Pipeline
+            logger.info(f"🔄 Iniciando Sequential Pipeline con session_id: {sequential_request.get('session_id')}...")
+            sequential_result = await self.execute_sequential_pipeline(sequential_request, session_id_final)
+            
+            # Resto del código igual...
+            
+            # Combinar resultados
+            complete_result = {
+                **data_collection_result,
+                "sequential_pipeline_executed": True,
+                "sequential_pipeline_result": sequential_result,
+                "complete_orchestration_success": (
+                    data_collection_result.get("success", False) and 
+                    sequential_result.get("success", False)
+                ),
+                "employee_ready_for_onboarding": sequential_result.get("employee_ready_for_onboarding", False),
+                "onboarding_timeline": sequential_result.get("onboarding_timeline"),
+                "session_id": session_id_final,  # ✅ ASEGURAR SESSION_ID
+                "total_stages_completed": (
+                    data_collection_result.get("agents_coordinated", 0) +
+                    sequential_result.get("stages_completed", 0)
+                ),
+                "final_next_actions": [
+                    "✅ Orquestación completa terminada",
+                    "🎯 Empleado listo para inicio de onboarding" if sequential_result.get("employee_ready_for_onboarding") else "⚠️ Requiere revisión manual",
+                    "📅 Ejecutar timeline de onboarding" if sequential_result.get("onboarding_timeline") else "📋 Coordinar onboarding manualmente"
+                ]
+            }
+            
+            logger.info(f"✅ Orquestación completa terminada: {complete_result['complete_orchestration_success']}")
+            return complete_result
+            
+        except Exception as e:
+            logger.error(f"Error en orquestación completa: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "complete_orchestration_success": False,
+                "employee_ready_for_onboarding": False,
+                "session_id": session_id  # ✅ ASEGURAR SESSION_ID INCLUSO EN ERROR
             }

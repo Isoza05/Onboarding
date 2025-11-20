@@ -318,7 +318,7 @@ def cross_validator_tool(
         
         result = {
             "success": True,
-            "field_validations": [fv.dict() for fv in field_validations],
+            "field_validations": [fv.dict() if hasattr(fv, 'dict') else fv for fv in field_validations],
             "consistency_score": consistency_score,
             "consistency_status": consistency_status.value,
             "critical_issues": critical_issues,
@@ -414,10 +414,10 @@ def _validate_identity_consistency(consolidated_data: Dict, source_data: Dict) -
         id_validation.discrepancies.append("Múltiples números de cédula detectados")
         critical_issues.append(f"Inconsistencia crítica en número de cédula: {unique_ids}")
     
-    validations.append(id_validation)
+    validations.append(name_validation)
     
     return {
-        "validations": validations,
+        "validations": [v.dict() for v in validations],  # ← CONVERTIR A DICT AQUÍ
         "critical_issues": critical_issues,
         "warnings": warnings
     }
@@ -447,7 +447,7 @@ def _validate_contract_consistency(consolidated_data: Dict, source_data: Dict) -
     validations.append(salary_validation)
     
     return {
-        "validations": validations,
+        "validations": [v.dict() for v in validations],  # ← CAMBIAR TAMBIÉN AQUÍ
         "warnings": warnings
     }
 
@@ -481,7 +481,7 @@ def _validate_academic_consistency(consolidated_data: Dict, source_data: Dict) -
     validations.append(university_validation)
     
     return {
-        "validations": validations,
+        "validations": [v.dict() for v in validations], 
         "warnings": warnings
     }
 
