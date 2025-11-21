@@ -10047,7 +10047,7 @@
         }
       },
       "started_at": "2025-11-21T04:59:44.977811",
-      "updated_at": "2025-11-21T05:00:17.916051+00:00",
+      "updated_at": "2025-11-21T05:00:18.025004+00:00",
       "priority": 1,
       "requires_manual_review": false,
       "config": {}
@@ -10059,7 +10059,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:35.314233+00:00",
+      "last_updated": "2025-11-21T15:43:19.157259+00:00",
       "data": {
         "version": "1.0",
         "specialization": "data_extraction_validation",
@@ -10073,7 +10073,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:35.363109+00:00",
+      "last_updated": "2025-11-21T15:43:19.222538+00:00",
       "data": {
         "version": "1.0",
         "specialization": "contract_validation_offer_generation",
@@ -10089,10 +10089,10 @@
     },
     "documentation_agent": {
       "agent_id": "documentation_agent",
-      "status": "completed",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T04:21:18.391374+00:00",
+      "last_updated": "2025-11-21T15:43:19.299434+00:00",
       "data": {
         "version": "1.0",
         "specialization": "document_analysis_validation",
@@ -10111,11 +10111,7 @@
           "id_authentication": true,
           "academic_verification": true,
           "document_analysis": true
-        },
-        "data_corruption_detected": true,
-        "validation_score": 0.0,
-        "output_corrupted": true,
-        "requires_reprocessing": true
+        }
       },
       "errors": [],
       "metadata": {}
@@ -10125,7 +10121,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:35.488273+00:00",
+      "last_updated": "2025-11-21T15:43:19.425961+00:00",
       "data": {
         "version": "1.0",
         "specialization": "data_aggregation_cross_validation",
@@ -10160,7 +10156,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T04:21:24.459572+00:00",
+      "last_updated": "2025-11-21T15:43:19.539010+00:00",
       "data": {
         "version": "1.0",
         "specialization": "it_provisioning_credential_management",
@@ -10188,31 +10184,17 @@
           "it_department_simulator",
           "common_state",
           "contract_agent"
-        ],
-        "started_at": "2025-11-21T04:20:48.050453",
-        "current_task": "provisioning_credentials",
-        "timeout_risk": true,
-        "error_count": 4,
-        "last_error": "Timeout connecting to provisioning service",
-        "consecutive_failures": 3,
-        "last_attempt": "2025-11-21T04:21:18.268329",
-        "failed_operations": [
-          "create_user_account",
-          "assign_equipment"
-        ],
-        "restored_at": "2025-11-21T04:21:24.459572",
-        "restored_from": "error",
-        "restoration_reason": "recovery_state_restoration"
+        ]
       },
       "errors": [],
       "metadata": {}
     },
     "contract_management_agent": {
       "agent_id": "contract_management_agent",
-      "status": "processing",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T04:21:18.332362+00:00",
+      "last_updated": "2025-11-21T15:43:19.624475+00:00",
       "data": {
         "version": "1.0",
         "specialization": "legal_contract_signature_management",
@@ -10244,17 +10226,7 @@
           "hr_department_simulator",
           "common_state",
           "meeting_agent"
-        ],
-        "error_count": 4,
-        "last_error": "Legal validation service unavailable",
-        "failed_operations": [
-          "contract_generation",
-          "legal_validation"
-        ],
-        "started_at": "2025-11-21T03:36:18.332362",
-        "current_operation": "legal_validation",
-        "timeout_risk": true,
-        "processing_duration": 2700
+        ]
       },
       "errors": [],
       "metadata": {}
@@ -10264,7 +10236,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:35.674799+00:00",
+      "last_updated": "2025-11-21T15:43:19.738906+00:00",
       "data": {
         "version": "1.0",
         "specialization": "meeting_coordination_calendar_management",
@@ -10306,7 +10278,7 @@
       "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:35.734568+00:00",
+      "last_updated": "2025-11-21T15:43:19.847919+00:00",
       "data": {
         "version": "1.0",
         "specialization": "pipeline_monitoring_quality_assurance",
@@ -10352,43 +10324,54 @@
       "status": "completed",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-20T17:22:36.348046+00:00",
+      "last_updated": "2025-11-21T15:43:22.092721+00:00",
       "data": {
-        "version": "2.0_SIMPLIFIED_FINAL",
-        "specialization": "workflow_orchestration_coordination",
+        "version": "3.0_WITH_ERROR_HANDLING",
+        "specialization": "workflow_orchestration_with_error_handling",
         "tools_count": 4,
         "workflow_status": {
           "data_collection_workflow": {
             "available": true,
             "agents_initialized": 3,
             "total_agents": 3,
-            "data_aggregator_available": true
+            "data_aggregator_available": true,
+            "error_handling_integrated": true
           },
           "sequential_pipeline_workflow": {
             "available": true,
             "agents_initialized": 3,
             "total_agents": 3,
-            "progress_tracker_available": true
+            "progress_tracker_available": true,
+            "error_handling_integrated": true
           },
-          "total_workflow_nodes": 14
+          "total_workflow_nodes": 15,
+          "error_handling_capabilities": {
+            "real_data_processing": true,
+            "quality_score_detection": true,
+            "agent_failure_detection": true,
+            "automatic_error_routing": true
+          }
         },
-        "current_task": "sequential_pipeline_completed",
-        "orchestration_id": "orch_final_20251120_172236_EMP_REFACT_001",
-        "employee_id": "EMP_REFACT_001",
-        "started_at": "2025-11-20T17:22:36.227219+00:00",
+        "error_handling_enabled": true,
+        "current_task": "sequential_pipeline_real_completed",
+        "orchestration_id": "orch_real_20251121_154321_EMP_ERROR_HANDLING_INVALID_002",
+        "employee_id": "EMP_ERROR_HANDLING_INVALID_002",
+        "started_at": "2025-11-21T15:43:21.825085+00:00",
         "success": true,
-        "completed_at": "2025-11-20T17:22:36.348046+00:00",
-        "pipeline_success": true
+        "data_quality_score": 100.0,
+        "completed_at": "2025-11-21T15:43:22.092721+00:00",
+        "pipeline_success": false,
+        "pipeline_quality": 0.0
       },
       "errors": [],
       "metadata": {}
     },
     "audit_trail_agent": {
       "agent_id": "audit_trail_agent",
-      "status": "completed",
+      "status": "processing",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T05:00:17.916051+00:00",
+      "last_updated": "2025-11-21T15:43:22.370342+00:00",
       "data": {
         "version": "1.0",
         "specialization": "audit_trail_compliance",
@@ -10402,13 +10385,10 @@
         "compliance_standards": [
           "iso_27001"
         ],
-        "current_task": "audit_trail_completed",
-        "session_id": "2cc2962b-09f9-434c-aba3-a60357463c29",
-        "employee_id": "EMP_ERROR_FLOW_001",
-        "event_type": "escalation_triggered",
-        "events_logged": 2,
-        "compliance_score": 41.66666666666667,
-        "audit_success": true
+        "current_task": "audit_trail_creation",
+        "session_id": "session_real_20251121_154321",
+        "employee_id": "EMP_ERROR_HANDLING_INVALID_002",
+        "event_type": "escalation_triggered"
       },
       "errors": [],
       "metadata": {}
@@ -10418,7 +10398,7 @@
       "status": "completed",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T04:59:45.800684+00:00",
+      "last_updated": "2025-11-21T15:43:22.286635+00:00",
       "data": {
         "version": "1.0",
         "specialization": "error_analysis_classification",
@@ -10465,25 +10445,25 @@
           "audit_trail": "active"
         },
         "current_task": "completed",
-        "classification_id": "class_20251121_045945_EMP_ERROR_FLOW_001",
-        "employee_id": "EMP_ERROR_FLOW_001",
+        "classification_id": "class_20251121_154322_EMP_ERROR_HANDLING_INVALID_002",
+        "employee_id": "EMP_ERROR_HANDLING_INVALID_002",
         "error_source": "progress_tracker",
-        "started_at": "2025-11-21T04:59:45.435662",
-        "errors_classified": 3,
-        "global_severity": "emergency",
-        "recovery_strategy": "escalation_required",
-        "next_handler": "human_handoff_agent:manual_intervention_handler",
-        "completed_at": "2025-11-21T04:59:45.800684"
+        "started_at": "2025-11-21T15:43:22.191081",
+        "errors_classified": 0,
+        "global_severity": "medium",
+        "recovery_strategy": "manual_intervention",
+        "next_handler": "human_handoff_agent:human_specialist_router",
+        "completed_at": "2025-11-21T15:43:22.286635"
       },
       "errors": [],
       "metadata": {}
     },
     "recovery_agent": {
       "agent_id": "recovery_agent",
-      "status": "completed",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T05:00:16.857175+00:00",
+      "last_updated": "2025-11-21T15:43:21.478286+00:00",
       "data": {
         "version": "1.0",
         "specialization": "system_recovery_state_restoration",
@@ -10532,27 +10512,17 @@
           "state_management": "active",
           "observability": "active",
           "circuit_breakers": "managed"
-        },
-        "current_task": "completed",
-        "recovery_id": "dd6fa6f4-6a5d-4d43-8d33-2d1868ea6496",
-        "employee_id": "EMP_ERROR_FLOW_001",
-        "recovery_strategy": "exponential_backoff",
-        "recovery_priority": "medium",
-        "started_at": "2025-11-21T04:59:46.524465",
-        "recovery_status": "success",
-        "system_recovered": true,
-        "actions_executed": 1,
-        "completed_at": "2025-11-21T05:00:16.857175"
+        }
       },
       "errors": [],
       "metadata": {}
     },
     "human_handoff_agent": {
       "agent_id": "human_handoff_agent",
-      "status": "completed",
+      "status": "idle",
       "current_task": null,
       "progress": 0.0,
-      "last_updated": "2025-11-21T05:00:17.367891+00:00",
+      "last_updated": "2025-11-21T15:43:21.556977+00:00",
       "data": {
         "version": "1.0",
         "specialization": "human_escalation_context_preservation",
@@ -10595,23 +10565,12 @@
           "notification_systems": "active",
           "state_management": "active",
           "audit_trail": "active"
-        },
-        "current_task": "completed",
-        "handoff_id": "336d076f-b44d-4592-a681-8af62d449e2f",
-        "employee_id": "EMP_ERROR_FLOW_001",
-        "error_category": "agent_failure",
-        "handoff_priority": "critical",
-        "started_at": "2025-11-21T05:00:17.186030",
-        "handoff_status": "assigned",
-        "specialist_assigned": true,
-        "context_preserved": true,
-        "notifications_sent": 3,
-        "completed_at": "2025-11-21T05:00:17.367891"
+        }
       },
       "errors": [],
       "metadata": {}
     }
   },
   "system_metrics": {},
-  "last_updated": "2025-11-21T05:00:17.916051+00:00"
+  "last_updated": "2025-11-21T15:43:22.370342+00:00"
 }
